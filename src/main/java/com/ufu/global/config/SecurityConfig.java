@@ -80,6 +80,7 @@ public class SecurityConfig {
                                         "/v3/api-docs/**"
                                 ).permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/items/submissions").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/items/submissions/me").authenticated()
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, objectMapper),

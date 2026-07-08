@@ -11,6 +11,7 @@ import com.ufu.global.storage.StorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -33,5 +34,13 @@ public class ItemSubmissionService {
                 .build();
 
         return new ItemSubmissionResponse(itemSubmissionRepository.save(itemSubmission));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ItemSubmissionResponse> getMySubmissions(Long submitterId) {
+        return itemSubmissionRepository.findAllBySubmitterIdOrderByCreatedAtDesc(submitterId)
+                .stream()
+                .map(ItemSubmissionResponse::new)
+                .toList();
     }
 }

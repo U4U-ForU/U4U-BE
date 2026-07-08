@@ -7,6 +7,7 @@ import com.ufu.domain.user.exception.UserNotFoundException;
 import com.ufu.global.error.ErrorResponse;
 import com.ufu.global.security.auth.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -21,10 +22,12 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
 
 @Tag(name = "Item Submission", description = "아이템 제출 API")
 @RestController
@@ -54,10 +57,30 @@ public class ItemSubmissionController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @Valid @ModelAttribute ItemSubmissionRequest request
     ) {
+        return itemSubmissionService.submit(getUserId(customUserDetails), request);
+    }
+
+    @Operation(summary = "내 아이템 제출 목록 조회", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "내 아이템 제출 목록 조회 성공",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ItemSubmissionResponse.class)))),
+            @ApiResponse(responseCode = "401", description = "인증 필요",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "접근 권한 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/me")
+    public List<ItemSubmissionResponse> getMySubmissions(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ) {
+        return itemSubmissionService.getMySubmissions(getUserId(customUserDetails));
+    }
+
+    private Long getUserId(CustomUserDetails customUserDetails) {
         if (customUserDetails == null) {
             throw UserNotFoundException.EXCEPTION;
         }
 
-        return itemSubmissionService.submit(customUserDetails.getUser().getId(), request);
+        return customUserDetails.getUser().getId();
     }
 }
