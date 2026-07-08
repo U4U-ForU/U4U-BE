@@ -24,6 +24,9 @@ spring:
 server:
   port: 8080
 
+file:
+  upload-dir: uploads
+
 jwt:
   secretKey: ${JWT_SECRET_KEY:dWZ1LWp3dC1zZWNyZXQta2V5LWZvci1sb2NhbC1kZXZlbG9wbWVudC0yMDI2LXNlY3JldA==}
   accessExp: ${ACCESS_EXP:3600}

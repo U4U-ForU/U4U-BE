@@ -5,6 +5,8 @@ import com.ufu.global.error.exception.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindException;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -26,13 +28,27 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
             MethodArgumentNotValidException exception) {
         log.error("handleMethodArgumentNotValidException: {}", exception.getMessage(), exception);
-        String errorMessage = exception.getBindingResult()
-                .getAllErrors()
-                .get(0)
-                .getDefaultMessage();
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(ErrorResponse.of(HttpStatus.BAD_REQUEST.value(), errorMessage));
+                .body(ErrorResponse.of(HttpStatus.BAD_REQUEST.value(), getErrorMessage(exception)));
+    }
+
+    @ExceptionHandler(BindException.class)
+    public ResponseEntity<ErrorResponse> handleBindException(BindException exception) {
+        log.error("handleBindException: {}", exception.getMessage(), exception);
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.of(HttpStatus.BAD_REQUEST.value(), getErrorMessage(exception)));
+    }
+
+    private String getErrorMessage(BindException exception) {
+        return exception.getBindingResult()
+                .getAllErrors()
+                .stream()
+                .findFirst()
+                .map(ObjectError::getDefaultMessage)
+                .orElse("요청 값이 올바르지 않습니다");
     }
 }

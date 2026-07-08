@@ -1,12 +1,16 @@
 package com.ufu.global.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ufu.global.error.ErrorResponse;
 import com.ufu.global.security.jwt.JwtAuthenticationFilter;
 import com.ufu.global.security.jwt.JwtTokenProvider;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -56,6 +60,13 @@ public class SecurityConfig {
                         form.disable())
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(exception ->
+                        exception
+                                .authenticationEntryPoint((request, response, authException) ->
+                                        sendErrorResponse(response, HttpStatus.UNAUTHORIZED, "인증이 필요합니다"))
+                                .accessDeniedHandler((request, response, accessDeniedException) ->
+                                        sendErrorResponse(response, HttpStatus.FORBIDDEN, "접근 권한이 없습니다"))
+                )
 
                 .authorizeHttpRequests(auth ->
                         auth
@@ -65,8 +76,10 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         "/swagger-ui/**",
                                         "/swagger-ui.html",
+                                        "/v3/api-docs",
                                         "/v3/api-docs/**"
                                 ).permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/items/submissions").authenticated()
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, objectMapper),
@@ -78,5 +91,15 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    private void sendErrorResponse(HttpServletResponse response, HttpStatus httpStatus, String message)
+            throws java.io.IOException {
+        response.setStatus(httpStatus.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(objectMapper.writeValueAsString(
+                ErrorResponse.of(httpStatus.value(), message)
+        ));
     }
 }

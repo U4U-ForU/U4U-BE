@@ -98,6 +98,9 @@ global
 
 - Request DTO와 Response DTO를 분리합니다.
 - Request DTO에는 필요한 validation을 추가합니다.
+- DTO에는 `@Setter`를 기본으로 사용하지 않습니다.
+- JSON 요청 DTO는 기본 생성자와 getter 중심으로 구성합니다.
+- `multipart/form-data`의 `@ModelAttribute` 바인딩처럼 setter가 필요해 보이는 경우에도 먼저 Controller의 바인딩 방식이나 전용 요청 객체를 검토합니다.
 - Swagger 설명이 필요한 필드는 `@Schema`를 사용합니다.
 - 사용자 화면이나 API 응답에 내부 구현 용어를 과하게 노출하지 않습니다.
 - `DB`, `PK`, `JWT`, `Entity`, `user_id` 같은 용어를 사용자-facing 응답/문구에 직접 노출하지 않습니다.
@@ -132,6 +135,8 @@ global
 
 - Controller에는 `@Tag`를 사용해 API 그룹을 설명할 수 있습니다.
 - API 메서드에는 `@Operation`을 사용해 동작을 설명할 수 있습니다.
+- API별 주요 성공/실패 응답은 `@ApiResponses`로 문서화합니다.
+- 공통 에러 형식은 `ErrorResponse` schema로 표시합니다.
 - DTO 필드에는 `@Schema`를 사용해 요청/응답 예시를 제공합니다.
 - 인증이 필요한 API는 Swagger에서 Bearer 토큰을 넣고 테스트할 수 있도록 `@SecurityRequirement`를 사용합니다.
 - Swagger 설명은 사용자와 개발자가 이해하기 쉬운 문장으로 작성합니다.
