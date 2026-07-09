@@ -4,5 +4,5 @@ public enum ItemSubmissionStatus {
     PENDING,
     APPROVED,
     REJECTED,
-    CANCELLED
+    CANCELED
 }

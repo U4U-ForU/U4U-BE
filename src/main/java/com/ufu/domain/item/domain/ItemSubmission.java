@@ -58,4 +58,16 @@ public class ItemSubmission extends BaseEntity {
         this.submitter = submitter;
         this.status = ItemSubmissionStatus.PENDING;
     }
+
+    public boolean isSubmittedBy(Long userId) {
+        return submitter.getId().equals(userId);
+    }
+
+    public boolean isPending() {
+        return status == ItemSubmissionStatus.PENDING;
+    }
+
+    public void cancel() {
+        this.status = ItemSubmissionStatus.CANCELED;
+    }
 }

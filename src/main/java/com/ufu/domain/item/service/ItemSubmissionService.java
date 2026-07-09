@@ -1,6 +1,9 @@
 package com.ufu.domain.item.service;
 
 import com.ufu.domain.item.domain.ItemSubmission;
+import com.ufu.domain.item.exception.ItemSubmissionForbiddenException;
+import com.ufu.domain.item.exception.ItemSubmissionNotFoundException;
+import com.ufu.domain.item.exception.ItemSubmissionNotPendingException;
 import com.ufu.domain.item.presentation.dto.request.ItemSubmissionRequest;
 import com.ufu.domain.item.presentation.dto.response.ItemSubmissionResponse;
 import com.ufu.domain.item.repository.ItemSubmissionRepository;
@@ -42,5 +45,22 @@ public class ItemSubmissionService {
                 .stream()
                 .map(ItemSubmissionResponse::new)
                 .toList();
+    }
+
+    @Transactional
+    public ItemSubmissionResponse cancel(Long submitterId, String submissionId) {
+        ItemSubmission itemSubmission = itemSubmissionRepository.findBySubmissionId(submissionId)
+                .orElseThrow(() -> ItemSubmissionNotFoundException.EXCEPTION);
+
+        if (!itemSubmission.isSubmittedBy(submitterId)) {
+            throw ItemSubmissionForbiddenException.EXCEPTION;
+        }
+
+        if (!itemSubmission.isPending()) {
+            throw ItemSubmissionNotPendingException.EXCEPTION;
+        }
+
+        itemSubmission.cancel();
+        return new ItemSubmissionResponse(itemSubmission);
     }
 }

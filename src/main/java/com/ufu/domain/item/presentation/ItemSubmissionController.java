@@ -23,6 +23,8 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -74,6 +76,26 @@ public class ItemSubmissionController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
         return itemSubmissionService.getMySubmissions(getUserId(customUserDetails));
+    }
+
+    @Operation(summary = "내 아이템 제출 취소", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "아이템 제출 취소 성공"),
+            @ApiResponse(responseCode = "400", description = "취소할 수 없는 제출 상태",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "인증 필요",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "접근 권한 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "제출 내역을 찾을 수 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PatchMapping("/{submissionId}/cancel")
+    public ItemSubmissionResponse cancel(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable String submissionId
+    ) {
+        return itemSubmissionService.cancel(getUserId(customUserDetails), submissionId);
     }
 
     private Long getUserId(CustomUserDetails customUserDetails) {

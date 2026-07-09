@@ -81,6 +81,7 @@ public class SecurityConfig {
                                 ).permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/items/submissions").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/items/submissions/me").authenticated()
+                                .requestMatchers(HttpMethod.PATCH, "/api/items/submissions/{submissionId}/cancel").authenticated()
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, objectMapper),
