@@ -2,6 +2,7 @@ package com.ufu.domain.item.presentation;
 
 import com.ufu.domain.item.presentation.dto.request.ItemSubmissionRequest;
 import com.ufu.domain.item.presentation.dto.response.ItemSubmissionResponse;
+import com.ufu.domain.item.presentation.dto.response.ItemSubmissionSummaryResponse;
 import com.ufu.domain.item.service.ItemSubmissionService;
 import com.ufu.domain.user.exception.UserNotFoundException;
 import com.ufu.global.error.ErrorResponse;
@@ -65,14 +66,14 @@ public class ItemSubmissionController {
     @Operation(summary = "내 아이템 제출 목록 조회", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "내 아이템 제출 목록 조회 성공",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ItemSubmissionResponse.class)))),
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ItemSubmissionSummaryResponse.class)))),
             @ApiResponse(responseCode = "401", description = "인증 필요",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = "접근 권한 없음",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/me")
-    public List<ItemSubmissionResponse> getMySubmissions(
+    public List<ItemSubmissionSummaryResponse> getMySubmissions(
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
         return itemSubmissionService.getMySubmissions(getUserId(customUserDetails));

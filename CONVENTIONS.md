@@ -97,6 +97,10 @@ global
 ## DTO
 
 - Request DTO와 Response DTO를 분리합니다.
+- 목록 조회와 상세 조회의 응답 DTO는 필요한 데이터가 다르면 분리합니다.
+- 목록 조회는 화면 목록 렌더링에 필요한 최소 필드만 담는 `SummaryResponse` 사용을 우선 검토합니다.
+- 상세 조회, 생성, 수정, 취소 응답은 화면 갱신에 필요한 충분한 필드를 담는 `Response`를 사용할 수 있습니다.
+- 단순히 DTO 수를 줄이기 위해 목록 API에 사용하지 않는 긴 설명, 본문, 내부 값을 과하게 포함하지 않습니다.
 - Request DTO에는 필요한 validation을 추가합니다.
 - DTO에는 `@Setter`를 기본으로 사용하지 않습니다.
 - JSON 요청 DTO는 기본 생성자와 getter 중심으로 구성합니다.

@@ -6,6 +6,7 @@ import com.ufu.domain.item.exception.ItemSubmissionNotFoundException;
 import com.ufu.domain.item.exception.ItemSubmissionNotPendingException;
 import com.ufu.domain.item.presentation.dto.request.ItemSubmissionRequest;
 import com.ufu.domain.item.presentation.dto.response.ItemSubmissionResponse;
+import com.ufu.domain.item.presentation.dto.response.ItemSubmissionSummaryResponse;
 import com.ufu.domain.item.repository.ItemSubmissionRepository;
 import com.ufu.domain.user.domain.User;
 import com.ufu.domain.user.exception.UserNotFoundException;
@@ -40,10 +41,10 @@ public class ItemSubmissionService {
     }
 
     @Transactional(readOnly = true)
-    public List<ItemSubmissionResponse> getMySubmissions(Long submitterId) {
+    public List<ItemSubmissionSummaryResponse> getMySubmissions(Long submitterId) {
         return itemSubmissionRepository.findAllBySubmitterIdOrderByCreatedAtDesc(submitterId)
                 .stream()
-                .map(ItemSubmissionResponse::new)
+                .map(ItemSubmissionSummaryResponse::new)
                 .toList();
     }
 
