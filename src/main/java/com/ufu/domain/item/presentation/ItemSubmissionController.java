@@ -78,6 +78,24 @@ public class ItemSubmissionController {
         return itemSubmissionService.getMySubmissions(getUserId(customUserDetails));
     }
 
+    @Operation(summary = "내 아이템 제출 상세 조회", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "내 아이템 제출 상세 조회 성공"),
+            @ApiResponse(responseCode = "401", description = "인증 필요",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "접근 권한 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "제출 내역을 찾을 수 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/{submissionId}")
+    public ItemSubmissionResponse getMySubmission(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable String submissionId
+    ) {
+        return itemSubmissionService.getMySubmission(getUserId(customUserDetails), submissionId);
+    }
+
     @Operation(summary = "내 아이템 제출 취소", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "아이템 제출 취소 성공"),

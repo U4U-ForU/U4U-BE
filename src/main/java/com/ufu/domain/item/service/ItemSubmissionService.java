@@ -47,6 +47,18 @@ public class ItemSubmissionService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public ItemSubmissionResponse getMySubmission(Long submitterId, String submissionId) {
+        ItemSubmission itemSubmission = itemSubmissionRepository.findBySubmissionId(submissionId)
+                .orElseThrow(() -> ItemSubmissionNotFoundException.EXCEPTION);
+
+        if (!itemSubmission.isSubmittedBy(submitterId)) {
+            throw ItemSubmissionForbiddenException.EXCEPTION;
+        }
+
+        return new ItemSubmissionResponse(itemSubmission);
+    }
+
     @Transactional
     public ItemSubmissionResponse cancel(Long submitterId, String submissionId) {
         ItemSubmission itemSubmission = itemSubmissionRepository.findBySubmissionId(submissionId)
