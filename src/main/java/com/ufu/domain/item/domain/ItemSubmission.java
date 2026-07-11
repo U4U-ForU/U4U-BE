@@ -70,5 +70,4 @@ public class ItemSubmission extends BaseEntity {
     public void cancel() {
         this.status = ItemSubmissionStatus.CANCELED;
     }
-    
 }
