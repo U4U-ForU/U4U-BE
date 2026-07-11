@@ -70,4 +70,5 @@ public class ItemSubmission extends BaseEntity {
     public void cancel() {
         this.status = ItemSubmissionStatus.CANCELED;
     }
+    // 주석으로 테스트를 해봐요
 }
