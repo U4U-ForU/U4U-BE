@@ -40,6 +40,9 @@ public class User extends BaseEntity {
     @Column(name = "role", nullable = false)
     private Role role;
 
+    @Column(name = "currency", nullable = false)
+    private int currency;
+
     @Builder
     private User(String loginId, String password, String email, String nickname, Role role) {
         this.loginId = loginId;
@@ -47,5 +50,14 @@ public class User extends BaseEntity {
         this.email = email;
         this.nickname = nickname;
         this.role = role;
+        this.currency = 20;
+    }
+
+    public boolean hasEnoughCurrency(int amount) {
+        return currency >= amount;
+    }
+
+    public void deductCurrency(int amount) {
+        this.currency -= amount;
     }
 }
