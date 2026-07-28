@@ -1,4 +1,4 @@
-package com.ufu.domain.item.exception;
+package com.ufu.domain.itemsubmission.exception;
 
 import com.ufu.global.error.exception.BusinessException;
 import com.ufu.global.error.exception.ErrorCode;

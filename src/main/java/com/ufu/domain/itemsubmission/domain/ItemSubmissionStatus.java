@@ -1,4 +1,4 @@
-package com.ufu.domain.item.domain;
+package com.ufu.domain.itemsubmission.domain;
 
 public enum ItemSubmissionStatus {
     PENDING,

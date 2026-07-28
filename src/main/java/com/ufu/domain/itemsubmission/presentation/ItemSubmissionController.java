@@ -1,9 +1,9 @@
-package com.ufu.domain.item.presentation;
+package com.ufu.domain.itemsubmission.presentation;
 
-import com.ufu.domain.item.presentation.dto.request.ItemSubmissionRequest;
-import com.ufu.domain.item.presentation.dto.response.ItemSubmissionResponse;
-import com.ufu.domain.item.presentation.dto.response.ItemSubmissionSummaryResponse;
-import com.ufu.domain.item.service.ItemSubmissionService;
+import com.ufu.domain.itemsubmission.presentation.dto.request.ItemSubmissionRequest;
+import com.ufu.domain.itemsubmission.presentation.dto.response.ItemSubmissionResponse;
+import com.ufu.domain.itemsubmission.presentation.dto.response.ItemSubmissionSummaryResponse;
+import com.ufu.domain.itemsubmission.service.ItemSubmissionService;
 import com.ufu.domain.user.exception.UserNotFoundException;
 import com.ufu.global.error.ErrorResponse;
 import com.ufu.global.security.auth.CustomUserDetails;

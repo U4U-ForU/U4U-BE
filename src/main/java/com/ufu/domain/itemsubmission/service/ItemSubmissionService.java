@@ -1,13 +1,19 @@
-package com.ufu.domain.item.service;
+package com.ufu.domain.itemsubmission.service;
 
-import com.ufu.domain.item.domain.ItemSubmission;
-import com.ufu.domain.item.exception.ItemSubmissionForbiddenException;
-import com.ufu.domain.item.exception.ItemSubmissionNotFoundException;
-import com.ufu.domain.item.exception.ItemSubmissionNotPendingException;
-import com.ufu.domain.item.presentation.dto.request.ItemSubmissionRequest;
-import com.ufu.domain.item.presentation.dto.response.ItemSubmissionResponse;
-import com.ufu.domain.item.presentation.dto.response.ItemSubmissionSummaryResponse;
-import com.ufu.domain.item.repository.ItemSubmissionRepository;
+import com.ufu.domain.item.domain.Item;
+import com.ufu.domain.item.domain.UserItem;
+import com.ufu.domain.item.repository.ItemRepository;
+import com.ufu.domain.item.repository.UserItemRepository;
+import com.ufu.domain.itemsubmission.domain.ItemSubmission;
+import com.ufu.domain.itemsubmission.exception.ItemSubmissionForbiddenException;
+import com.ufu.domain.itemsubmission.exception.ItemSubmissionNotApprovableException;
+import com.ufu.domain.itemsubmission.exception.ItemSubmissionNotFoundException;
+import com.ufu.domain.itemsubmission.exception.ItemSubmissionNotPendingException;
+import com.ufu.domain.itemsubmission.presentation.dto.request.ItemSubmissionRequest;
+import com.ufu.domain.itemsubmission.presentation.dto.response.ItemSubmissionResponse;
+import com.ufu.domain.itemsubmission.presentation.dto.response.ItemSubmissionApprovalResponse;
+import com.ufu.domain.itemsubmission.presentation.dto.response.ItemSubmissionSummaryResponse;
+import com.ufu.domain.itemsubmission.repository.ItemSubmissionRepository;
 import com.ufu.domain.user.domain.User;
 import com.ufu.domain.user.exception.UserNotFoundException;
 import com.ufu.domain.user.repository.UserRepository;
@@ -15,12 +21,15 @@ import com.ufu.global.storage.StorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ItemSubmissionService {
     private final ItemSubmissionRepository itemSubmissionRepository;
+    private final ItemRepository itemRepository;
+    private final UserItemRepository userItemRepository;
     private final UserRepository userRepository;
     private final StorageService storageService;
 
@@ -75,5 +84,35 @@ public class ItemSubmissionService {
 
         itemSubmission.cancel();
         return new ItemSubmissionResponse(itemSubmission);
+    }
+
+    @Transactional
+    public ItemSubmissionApprovalResponse approve(String submissionId) {
+        ItemSubmission itemSubmission = itemSubmissionRepository.findBySubmissionId(submissionId)
+                .orElseThrow(() -> ItemSubmissionNotFoundException.EXCEPTION);
+
+        if (!itemSubmission.isPending()) {
+            throw ItemSubmissionNotApprovableException.EXCEPTION;
+        }
+
+        itemSubmission.approve(LocalDateTime.now());
+
+        Item item = Item.builder()
+                .name(itemSubmission.getName())
+                .description(itemSubmission.getDescription())
+                .imageUrl(itemSubmission.getImageUrl())
+                .creator(itemSubmission.getSubmitter())
+                .approvedAt(itemSubmission.getApprovedAt())
+                .build();
+        itemRepository.save(item);
+
+        UserItem userItem = UserItem.builder()
+                .user(itemSubmission.getSubmitter())
+                .item(item)
+                .quantity(1)
+                .build();
+        userItemRepository.save(userItem);
+
+        return new ItemSubmissionApprovalResponse(itemSubmission, item);
     }
 }

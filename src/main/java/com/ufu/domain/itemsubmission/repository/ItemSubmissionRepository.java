@@ -1,6 +1,6 @@
-package com.ufu.domain.item.repository;
+package com.ufu.domain.itemsubmission.repository;
 
-import com.ufu.domain.item.domain.ItemSubmission;
+import com.ufu.domain.itemsubmission.domain.ItemSubmission;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;

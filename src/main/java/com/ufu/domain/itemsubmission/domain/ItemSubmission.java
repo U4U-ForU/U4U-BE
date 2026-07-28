@@ -1,4 +1,4 @@
-package com.ufu.domain.item.domain;
+package com.ufu.domain.itemsubmission.domain;
 
 import com.ufu.domain.user.domain.User;
 import com.ufu.global.entity.BaseEntity;
@@ -17,6 +17,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -45,6 +46,9 @@ public class ItemSubmission extends BaseEntity {
     @Column(name = "status", nullable = false)
     private ItemSubmissionStatus status;
 
+    @Column(name = "approved_at")
+    private LocalDateTime approvedAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "submitter_id", nullable = false)
     private User submitter;
@@ -70,5 +74,9 @@ public class ItemSubmission extends BaseEntity {
     public void cancel() {
         this.status = ItemSubmissionStatus.CANCELED;
     }
-    // 주석으로 테스트를 해봐요
+
+    public void approve(LocalDateTime approvedAt) {
+        this.status = ItemSubmissionStatus.APPROVED;
+        this.approvedAt = approvedAt;
+    }
 }
