@@ -9,9 +9,13 @@ import com.ufu.domain.itemsubmission.exception.ItemSubmissionForbiddenException;
 import com.ufu.domain.itemsubmission.exception.ItemSubmissionNotApprovableException;
 import com.ufu.domain.itemsubmission.exception.ItemSubmissionNotFoundException;
 import com.ufu.domain.itemsubmission.exception.ItemSubmissionNotPendingException;
+import com.ufu.domain.itemsubmission.exception.ItemSubmissionNotRejectableException;
 import com.ufu.domain.itemsubmission.presentation.dto.request.ItemSubmissionRequest;
+import com.ufu.domain.itemsubmission.presentation.dto.response.AdminItemSubmissionDetailResponse;
+import com.ufu.domain.itemsubmission.presentation.dto.response.AdminItemSubmissionSummaryResponse;
 import com.ufu.domain.itemsubmission.presentation.dto.response.ItemSubmissionResponse;
 import com.ufu.domain.itemsubmission.presentation.dto.response.ItemSubmissionApprovalResponse;
+import com.ufu.domain.itemsubmission.presentation.dto.response.ItemSubmissionRejectionResponse;
 import com.ufu.domain.itemsubmission.presentation.dto.response.ItemSubmissionSummaryResponse;
 import com.ufu.domain.itemsubmission.repository.ItemSubmissionRepository;
 import com.ufu.domain.user.domain.User;
@@ -86,6 +90,22 @@ public class ItemSubmissionService {
         return new ItemSubmissionResponse(itemSubmission);
     }
 
+    @Transactional(readOnly = true)
+    public List<AdminItemSubmissionSummaryResponse> getAdminSubmissions() {
+        return itemSubmissionRepository.findAllByOrderByCreatedAtDesc()
+                .stream()
+                .map(AdminItemSubmissionSummaryResponse::new)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public AdminItemSubmissionDetailResponse getAdminSubmission(String submissionId) {
+        ItemSubmission itemSubmission = itemSubmissionRepository.findBySubmissionId(submissionId)
+                .orElseThrow(() -> ItemSubmissionNotFoundException.EXCEPTION);
+
+        return new AdminItemSubmissionDetailResponse(itemSubmission);
+    }
+
     @Transactional
     public ItemSubmissionApprovalResponse approve(String submissionId) {
         ItemSubmission itemSubmission = itemSubmissionRepository.findBySubmissionId(submissionId)
@@ -114,5 +134,18 @@ public class ItemSubmissionService {
         userItemRepository.save(userItem);
 
         return new ItemSubmissionApprovalResponse(itemSubmission, item);
+    }
+
+    @Transactional
+    public ItemSubmissionRejectionResponse reject(String submissionId) {
+        ItemSubmission itemSubmission = itemSubmissionRepository.findBySubmissionId(submissionId)
+                .orElseThrow(() -> ItemSubmissionNotFoundException.EXCEPTION);
+
+        if (!itemSubmission.isPending()) {
+            throw ItemSubmissionNotRejectableException.EXCEPTION;
+        }
+
+        itemSubmission.reject();
+        return new ItemSubmissionRejectionResponse(itemSubmission);
     }
 }

@@ -17,6 +17,7 @@ public enum ErrorCode {
     INVENTORY_ITEM_NOT_FOUND(404, "보유한 아이템을 찾을 수 없습니다"),
     ADMIN_ACCESS_DENIED(403, "관리자만 접근할 수 있습니다"),
     ITEM_SUBMISSION_NOT_APPROVABLE(400, "심사 중인 제출만 승인할 수 있습니다"),
+    ITEM_SUBMISSION_NOT_REJECTABLE(400, "심사 중인 제출만 거절할 수 있습니다"),
     INSUFFICIENT_CURRENCY(400, "보유 재화가 부족합니다"),
     GACHA_POOL_EMPTY(400, "뽑기 가능한 아이템이 없습니다"),
     ITEM_SUBMISSION_NOT_FOUND(404, "아이템 제출 내역을 찾을 수 없습니다"),

@@ -79,4 +79,8 @@ public class ItemSubmission extends BaseEntity {
         this.status = ItemSubmissionStatus.APPROVED;
         this.approvedAt = approvedAt;
     }
+
+    public void reject() {
+        this.status = ItemSubmissionStatus.REJECTED;
+    }
 }

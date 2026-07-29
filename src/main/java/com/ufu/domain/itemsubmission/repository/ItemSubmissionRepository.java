@@ -8,5 +8,7 @@ import java.util.Optional;
 public interface ItemSubmissionRepository extends JpaRepository<ItemSubmission, Long> {
     List<ItemSubmission> findAllBySubmitterIdOrderByCreatedAtDesc(Long submitterId);
 
+    List<ItemSubmission> findAllByOrderByCreatedAtDesc();
+
     Optional<ItemSubmission> findBySubmissionId(String submissionId);
 }
