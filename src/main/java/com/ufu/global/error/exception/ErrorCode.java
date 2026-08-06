@@ -22,7 +22,16 @@ public enum ErrorCode {
     GACHA_POOL_EMPTY(400, "뽑기 가능한 아이템이 없습니다"),
     ITEM_SUBMISSION_NOT_FOUND(404, "아이템 제출 내역을 찾을 수 없습니다"),
     ITEM_SUBMISSION_FORBIDDEN(403, "해당 제출을 취소할 권한이 없습니다"),
-    ITEM_SUBMISSION_NOT_PENDING(400, "심사 중인 제출만 취소할 수 있습니다");
+    ITEM_SUBMISSION_NOT_PENDING(400, "심사 중인 제출만 취소할 수 있습니다"),
+    TRADE_POST_NOT_FOUND(404, "거래 게시물을 찾을 수 없습니다"),
+    TRADE_COMMENT_NOT_FOUND(404, "거래 제안을 찾을 수 없습니다"),
+    TRADE_FORBIDDEN(403, "해당 거래를 처리할 권한이 없습니다"),
+    TRADE_SELF_COMMENT_FORBIDDEN(403, "자신의 거래 게시물에는 제안할 수 없습니다"),
+    TRADE_COMMENT_ALREADY_EXISTS(409, "이미 활성 거래 제안이 있습니다"),
+    TRADE_POST_COMPLETED(409, "이미 성사된 거래입니다"),
+    TRADE_POST_INVALID_STATE(409, "현재 거래 상태에서는 처리할 수 없습니다"),
+    TRADE_INVALID_ITEM_QUANTITY(400, "아이템은 총 1개 이상 10개 이하로 선택해야 합니다"),
+    TRADE_INSUFFICIENT_ITEM_QUANTITY(400, "거래 가능한 아이템 수량이 부족합니다");
 
     private final int status;
     private final String message;

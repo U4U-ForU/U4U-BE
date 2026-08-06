@@ -3,6 +3,7 @@ package com.ufu.domain.item.presentation;
 import com.ufu.domain.item.presentation.dto.request.ItemSortType;
 import com.ufu.domain.item.presentation.dto.response.MyItemDetailResponse;
 import com.ufu.domain.item.presentation.dto.response.MyItemSummaryResponse;
+import com.ufu.domain.item.presentation.dto.response.MyTradingItemGroupResponse;
 import com.ufu.domain.item.service.ItemService;
 import com.ufu.domain.user.exception.UserNotFoundException;
 import com.ufu.global.error.ErrorResponse;
@@ -61,6 +62,13 @@ public class ItemController {
             @PathVariable String itemId
     ) {
         return itemService.getMyItemDetail(getUserId(customUserDetails), itemId);
+    }
+
+    @GetMapping("/trading")
+    public List<MyTradingItemGroupResponse> getMyTradingItems(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ) {
+        return itemService.getMyTradingItems(getUserId(customUserDetails));
     }
 
     private Long getUserId(CustomUserDetails customUserDetails) {

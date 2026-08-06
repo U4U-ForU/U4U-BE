@@ -34,6 +34,12 @@ global
 - 파일 저장처럼 외부 저장소로 교체 가능한 기능은 `global/storage`에 둡니다.
 - 현재 단계에서는 `global.response` 패키지를 만들지 않습니다.
 
+## Java Import
+
+- 같은 파일에서 반복해서 사용하는 타입, 또는 전체 패키지명보다 타입명만 쓰는 편이 명확한 타입은 반드시 `import`로 선언해 짧은 클래스명으로 사용합니다.
+- `com.ufu.domain.trade.domain.TradeCommentStatus.PENDING`처럼 패키지 전체 경로를 코드 본문에 직접 반복하지 않고, import 후 `TradeCommentStatus.PENDING`처럼 작성합니다.
+- wildcard import(`*`)는 같은 패키지의 타입을 여러 개 사용할 때 가독성을 해치지 않는 범위에서 사용할 수 있습니다.
+
 ## DTO
 
 - Request DTO와 Response DTO를 분리합니다.

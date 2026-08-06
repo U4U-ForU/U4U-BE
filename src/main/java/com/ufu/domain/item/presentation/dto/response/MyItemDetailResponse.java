@@ -23,6 +23,12 @@ public class MyItemDetailResponse {
     @Schema(description = "보유 수량", example = "3")
     private final int quantity;
 
+    @Schema(description = "거래 예약 수량", example = "1")
+    private final int reservedQuantity;
+
+    @Schema(description = "거래 가능 수량", example = "2")
+    private final int availableQuantity;
+
     @Schema(description = "아이템 승인 시간")
     private final LocalDateTime approvedAt;
 
@@ -35,6 +41,8 @@ public class MyItemDetailResponse {
         this.description = userItem.getItem().getDescription();
         this.imageUrl = userItem.getItem().getImageUrl();
         this.quantity = userItem.getQuantity();
+        this.reservedQuantity = userItem.getReservedQuantity();
+        this.availableQuantity = userItem.getAvailableQuantity();
         this.approvedAt = userItem.getItem().getApprovedAt();
         this.creatorLoginId = userItem.getItem().getCreator().getLoginId();
     }

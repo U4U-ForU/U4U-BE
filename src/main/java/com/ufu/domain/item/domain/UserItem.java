@@ -41,14 +41,47 @@ public class UserItem extends BaseEntity {
     @Column(name = "quantity", nullable = false)
     private int quantity;
 
+    @Column(name = "reserved_quantity", nullable = false)
+    private int reservedQuantity;
+
     @Builder
     private UserItem(User user, Item item, int quantity) {
         this.user = user;
         this.item = item;
         this.quantity = quantity;
+        this.reservedQuantity = 0;
     }
 
     public void increaseQuantity(int amount) {
         this.quantity += amount;
+    }
+
+    public int getAvailableQuantity() {
+        return quantity - reservedQuantity;
+    }
+
+    public boolean hasAvailableQuantity(int amount) {
+        return amount > 0 && getAvailableQuantity() >= amount;
+    }
+
+    public void reserveQuantity(int amount) {
+        if (!hasAvailableQuantity(amount)) {
+            throw new IllegalArgumentException("예약 가능한 아이템 수량이 부족합니다");
+        }
+
+        reservedQuantity += amount;
+    }
+
+    public void releaseReservedQuantity(int amount) {
+        if (amount <= 0 || reservedQuantity < amount) {
+            throw new IllegalArgumentException("예약 해제 수량이 올바르지 않습니다");
+        }
+
+        reservedQuantity -= amount;
+    }
+
+    public void transferReservedQuantity(int amount) {
+        releaseReservedQuantity(amount);
+        quantity -= amount;
     }
 }
