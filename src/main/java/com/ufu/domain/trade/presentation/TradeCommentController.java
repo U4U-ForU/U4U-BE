@@ -2,6 +2,7 @@ package com.ufu.domain.trade.presentation;
 
 import com.ufu.domain.trade.presentation.dto.request.TradeCommentCreateRequest;
 import com.ufu.domain.trade.presentation.dto.response.TradeCommentResponse;
+import com.ufu.domain.trade.presentation.dto.response.TradeCompletionResponse;
 import com.ufu.domain.trade.service.TradeCommentService;
 import com.ufu.domain.trade.service.TradeCompletionService;
 import com.ufu.domain.user.exception.UserNotFoundException;
@@ -37,23 +38,21 @@ public class TradeCommentController {
     }
 
     @DeleteMapping("/{commentId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void cancelComment(
+    public TradeCommentResponse cancelComment(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PathVariable String tradeId,
             @PathVariable String commentId
     ) {
-        tradeCommentService.cancelComment(getUserId(customUserDetails), tradeId, commentId);
+        return tradeCommentService.cancelComment(getUserId(customUserDetails), tradeId, commentId);
     }
 
     @PatchMapping("/{commentId}/accept")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void completeTrade(
+    public TradeCompletionResponse completeTrade(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PathVariable String tradeId,
             @PathVariable String commentId
     ) {
-        tradeCompletionService.completeTrade(getUserId(customUserDetails), tradeId, commentId);
+        return tradeCompletionService.completeTrade(getUserId(customUserDetails), tradeId, commentId);
     }
 
     private Long getUserId(CustomUserDetails customUserDetails) {

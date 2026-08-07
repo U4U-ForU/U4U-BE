@@ -10,6 +10,7 @@ import com.ufu.domain.trade.exception.TradeForbiddenException;
 import com.ufu.domain.trade.exception.TradePostCompletedException;
 import com.ufu.domain.trade.exception.TradePostInvalidStateException;
 import com.ufu.domain.trade.exception.TradePostNotFoundException;
+import com.ufu.domain.trade.presentation.dto.response.TradeCompletionResponse;
 import com.ufu.domain.trade.repository.TradeCommentItemRepository;
 import com.ufu.domain.trade.repository.TradeCommentRepository;
 import com.ufu.domain.trade.repository.TradePostItemRepository;
@@ -31,7 +32,7 @@ public class TradeCompletionService {
     private final TradeCommentService tradeCommentService;
 
     @Transactional
-    public void completeTrade(Long userId, String tradeId, String commentId) {
+    public TradeCompletionResponse completeTrade(Long userId, String tradeId, String commentId) {
         TradePost tradePost = findOpenPostForUpdate(tradeId);
         if (!tradePost.isWrittenBy(userId)) {
             throw TradeForbiddenException.EXCEPTION;
@@ -58,6 +59,12 @@ public class TradeCompletionService {
         acceptedComment.accept();
         tradeCommentService.deletePendingComments(tradePost, acceptedComment.getCommentId());
         tradePost.complete();
+
+        return new TradeCompletionResponse(
+                tradePost.getTradeId(),
+                acceptedComment.getCommentId(),
+                tradePost.getCompletedAt()
+        );
     }
 
     private TradePost findOpenPostForUpdate(String tradeId) {

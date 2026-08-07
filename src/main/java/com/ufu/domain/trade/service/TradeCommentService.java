@@ -23,7 +23,6 @@ import com.ufu.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +75,7 @@ public class TradeCommentService {
     }
 
     @Transactional
-    public void cancelComment(Long userId, String tradeId, String commentId) {
+    public TradeCommentResponse cancelComment(Long userId, String tradeId, String commentId) {
         TradePost tradePost = findOpenPostForUpdate(tradeId);
         TradeComment tradeComment = tradeCommentRepository.findByCommentId(commentId)
                 .orElseThrow(() -> TradeCommentNotFoundException.EXCEPTION);
@@ -89,10 +88,13 @@ public class TradeCommentService {
             throw TradeForbiddenException.EXCEPTION;
         }
 
+        TradeCommentResponse response = toResponse(tradeComment);
         Map<Item, Integer> items = getCommentItems(tradeComment);
         tradeTransactionService.releaseItems(tradeComment.getAuthor(), items);
         tradeCommentItemRepository.deleteAllByTradeCommentId(tradeComment.getId());
         tradeCommentRepository.delete(tradeComment);
+
+        return response;
     }
 
     @Transactional(readOnly = true)

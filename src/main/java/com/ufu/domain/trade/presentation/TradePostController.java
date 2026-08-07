@@ -2,6 +2,7 @@ package com.ufu.domain.trade.presentation;
 
 import com.ufu.domain.trade.presentation.dto.request.TradePostCreateRequest;
 import com.ufu.domain.trade.presentation.dto.request.TradePostTitleUpdateRequest;
+import com.ufu.domain.trade.presentation.dto.response.TradePostDeleteResponse;
 import com.ufu.domain.trade.presentation.dto.response.TradePostDetailResponse;
 import com.ufu.domain.trade.presentation.dto.response.TradePostSummaryResponse;
 import com.ufu.domain.trade.service.TradePostService;
@@ -74,12 +75,11 @@ public class TradePostController {
     }
 
     @DeleteMapping("/{tradeId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletePost(
+    public TradePostDeleteResponse deletePost(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PathVariable String tradeId
     ) {
-        tradePostService.deletePost(getUserId(customUserDetails), tradeId);
+        return tradePostService.deletePost(getUserId(customUserDetails), tradeId);
     }
 
     private Long getUserId(CustomUserDetails customUserDetails) {

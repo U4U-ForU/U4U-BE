@@ -12,6 +12,7 @@ import com.ufu.domain.trade.exception.TradePostNotFoundException;
 import com.ufu.domain.trade.presentation.dto.request.TradePostCreateRequest;
 import com.ufu.domain.trade.presentation.dto.request.TradePostTitleUpdateRequest;
 import com.ufu.domain.trade.presentation.dto.response.TradeItemResponse;
+import com.ufu.domain.trade.presentation.dto.response.TradePostDeleteResponse;
 import com.ufu.domain.trade.presentation.dto.response.TradePostDetailResponse;
 import com.ufu.domain.trade.presentation.dto.response.TradePostSummaryResponse;
 import com.ufu.domain.trade.repository.TradeCommentRepository;
@@ -23,7 +24,6 @@ import com.ufu.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,12 +102,14 @@ public class TradePostService {
     }
 
     @Transactional
-    public void deletePost(Long userId, String tradeId) {
+    public TradePostDeleteResponse deletePost(Long userId, String tradeId) {
         TradePost tradePost = findOpenPostForUpdate(tradeId);
         verifyAuthor(tradePost, userId);
         tradeTransactionService.releaseItems(tradePost.getAuthor(), getPostItems(tradePost));
         tradeCommentService.deletePendingComments(tradePost, null);
         tradePost.delete();
+
+        return new TradePostDeleteResponse(tradePost.getTradeId(), tradePost.getDeletedAt());
     }
 
     private TradeItemResponse saveTradePostItem(TradePost tradePost, Item item, int quantity) {
