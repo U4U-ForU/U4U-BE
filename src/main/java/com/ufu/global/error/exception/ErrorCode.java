@@ -15,8 +15,10 @@ public enum ErrorCode {
     INVALID_IMAGE_FILE(400, "이미지 파일 형식이 올바르지 않습니다"),
     FILE_UPLOAD_FAILED(500, "이미지 파일 저장에 실패했습니다"),
     INVENTORY_ITEM_NOT_FOUND(404, "보유한 아이템을 찾을 수 없습니다"),
+    ITEM_NOT_FOUND(404, "아이템을 찾을 수 없습니다"),
     ADMIN_ACCESS_DENIED(403, "관리자만 접근할 수 있습니다"),
     ITEM_SUBMISSION_NOT_APPROVABLE(400, "심사 중인 제출만 승인할 수 있습니다"),
+    ITEM_SUBMISSION_NOT_COMBINABLE(400, "심사 중인 제출만 조합 처리할 수 있습니다"),
     ITEM_SUBMISSION_NOT_REJECTABLE(400, "심사 중인 제출만 거절할 수 있습니다"),
     INSUFFICIENT_CURRENCY(400, "보유 재화가 부족합니다"),
     GACHA_POOL_EMPTY(400, "뽑기 가능한 아이템이 없습니다"),
@@ -31,7 +33,9 @@ public enum ErrorCode {
     TRADE_POST_COMPLETED(409, "이미 성사된 거래입니다"),
     TRADE_POST_INVALID_STATE(409, "현재 거래 상태에서는 처리할 수 없습니다"),
     TRADE_INVALID_ITEM_QUANTITY(400, "아이템은 총 1개 이상 10개 이하로 선택해야 합니다"),
-    TRADE_INSUFFICIENT_ITEM_QUANTITY(400, "거래 가능한 아이템 수량이 부족합니다");
+    TRADE_INSUFFICIENT_ITEM_QUANTITY(400, "거래 가능한 아이템 수량이 부족합니다"),
+    CAULDRON_RECIPE_NOT_FOUND(404, "조합법을 찾을 수 없습니다"),
+    CAULDRON_RECIPE_RESULT_ITEM_INVALID(400, "완성 아이템은 조합 아이템이어야 합니다");
 
     private final int status;
     private final String message;

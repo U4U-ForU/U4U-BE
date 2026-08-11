@@ -49,6 +49,9 @@ public class ItemSubmission extends BaseEntity {
     @Column(name = "approved_at")
     private LocalDateTime approvedAt;
 
+    @Column(name = "combined_at")
+    private LocalDateTime combinedAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "submitter_id", nullable = false)
     private User submitter;
@@ -82,5 +85,10 @@ public class ItemSubmission extends BaseEntity {
 
     public void reject() {
         this.status = ItemSubmissionStatus.REJECTED;
+    }
+
+    public void combine(LocalDateTime combinedAt) {
+        this.status = ItemSubmissionStatus.COMBINED;
+        this.combinedAt = combinedAt;
     }
 }

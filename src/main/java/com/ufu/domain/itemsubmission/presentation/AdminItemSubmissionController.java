@@ -4,6 +4,7 @@ import com.ufu.domain.itemsubmission.exception.AdminAccessDeniedException;
 import com.ufu.domain.itemsubmission.presentation.dto.response.AdminItemSubmissionDetailResponse;
 import com.ufu.domain.itemsubmission.presentation.dto.response.AdminItemSubmissionSummaryResponse;
 import com.ufu.domain.itemsubmission.presentation.dto.response.ItemSubmissionApprovalResponse;
+import com.ufu.domain.itemsubmission.presentation.dto.response.ItemSubmissionCombinationResponse;
 import com.ufu.domain.itemsubmission.presentation.dto.response.ItemSubmissionRejectionResponse;
 import com.ufu.domain.itemsubmission.service.ItemSubmissionService;
 import com.ufu.domain.user.domain.Role;
@@ -87,6 +88,27 @@ public class AdminItemSubmissionController {
     ) {
         validateAdmin(customUserDetails);
         return itemSubmissionService.approve(submissionId);
+    }
+
+    @Operation(summary = "아이템 제출 조합 처리", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "아이템 제출 조합 처리 성공"),
+            @ApiResponse(responseCode = "400", description = "조합 처리할 수 없는 제출 상태",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "인증 필요",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "관리자 권한 필요",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "제출 내역을 찾을 수 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PatchMapping("/{submissionId}/combine")
+    public ItemSubmissionCombinationResponse combine(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable String submissionId
+    ) {
+        validateAdmin(customUserDetails);
+        return itemSubmissionService.combine(submissionId);
     }
 
     @Operation(summary = "아이템 제출 거절", security = @SecurityRequirement(name = "bearerAuth"))

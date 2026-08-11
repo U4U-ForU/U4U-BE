@@ -4,6 +4,8 @@ import com.ufu.domain.user.domain.User;
 import com.ufu.global.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,6 +17,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -40,6 +43,11 @@ public class Item extends BaseEntity {
     @Column(name = "image_url", nullable = false, length = 2048)
     private String imageUrl;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    @ColumnDefault("'GACHA'")
+    private ItemStatus status;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id", nullable = false)
     private User creator;
@@ -48,11 +56,19 @@ public class Item extends BaseEntity {
     private LocalDateTime approvedAt;
 
     @Builder
-    private Item(String name, String description, String imageUrl, User creator, LocalDateTime approvedAt) {
+    private Item(
+            String name,
+            String description,
+            String imageUrl,
+            ItemStatus status,
+            User creator,
+            LocalDateTime approvedAt
+    ) {
         this.itemId = UUID.randomUUID().toString();
         this.name = name;
         this.description = description;
         this.imageUrl = imageUrl;
+        this.status = status == null ? ItemStatus.GACHA : status;
         this.creator = creator;
         this.approvedAt = approvedAt;
     }

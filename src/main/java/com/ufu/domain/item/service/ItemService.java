@@ -1,11 +1,15 @@
 package com.ufu.domain.item.service;
 
+import com.ufu.domain.item.domain.Item;
+import com.ufu.domain.item.domain.ItemStatus;
 import com.ufu.domain.item.domain.UserItem;
 import com.ufu.domain.item.exception.InventoryItemNotFoundException;
 import com.ufu.domain.item.presentation.dto.request.ItemSortType;
 import com.ufu.domain.item.presentation.dto.response.MyItemDetailResponse;
 import com.ufu.domain.item.presentation.dto.response.MyItemSummaryResponse;
 import com.ufu.domain.item.presentation.dto.response.MyTradingItemGroupResponse;
+import com.ufu.domain.item.presentation.dto.response.AdminItemSummaryResponse;
+import com.ufu.domain.item.repository.ItemRepository;
 import com.ufu.domain.item.repository.UserItemRepository;
 import com.ufu.domain.trade.domain.TradeComment;
 import com.ufu.domain.trade.domain.TradeCommentItem;
@@ -29,6 +33,7 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class ItemService {
+    private final ItemRepository itemRepository;
     private final UserItemRepository userItemRepository;
     private final TradePostRepository tradePostRepository;
     private final TradePostItemRepository tradePostItemRepository;
@@ -52,6 +57,17 @@ public class ItemService {
                 .orElseThrow(() -> InventoryItemNotFoundException.EXCEPTION);
 
         return new MyItemDetailResponse(userItem);
+    }
+
+    @Transactional(readOnly = true)
+    public List<AdminItemSummaryResponse> getAdminItems(ItemStatus status) {
+        List<Item> items = status == null
+                ? itemRepository.findAllByOrderByApprovedAtDesc()
+                : itemRepository.findAllByStatusOrderByApprovedAtDesc(status);
+
+        return items.stream()
+                .map(AdminItemSummaryResponse::new)
+                .toList();
     }
 
     @Transactional(readOnly = true)

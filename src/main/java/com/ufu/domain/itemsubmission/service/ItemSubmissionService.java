@@ -1,12 +1,14 @@
 package com.ufu.domain.itemsubmission.service;
 
 import com.ufu.domain.item.domain.Item;
+import com.ufu.domain.item.domain.ItemStatus;
 import com.ufu.domain.item.domain.UserItem;
 import com.ufu.domain.item.repository.ItemRepository;
 import com.ufu.domain.item.repository.UserItemRepository;
 import com.ufu.domain.itemsubmission.domain.ItemSubmission;
 import com.ufu.domain.itemsubmission.exception.ItemSubmissionForbiddenException;
 import com.ufu.domain.itemsubmission.exception.ItemSubmissionNotApprovableException;
+import com.ufu.domain.itemsubmission.exception.ItemSubmissionNotCombinableException;
 import com.ufu.domain.itemsubmission.exception.ItemSubmissionNotFoundException;
 import com.ufu.domain.itemsubmission.exception.ItemSubmissionNotPendingException;
 import com.ufu.domain.itemsubmission.exception.ItemSubmissionNotRejectableException;
@@ -15,6 +17,7 @@ import com.ufu.domain.itemsubmission.presentation.dto.response.AdminItemSubmissi
 import com.ufu.domain.itemsubmission.presentation.dto.response.AdminItemSubmissionSummaryResponse;
 import com.ufu.domain.itemsubmission.presentation.dto.response.ItemSubmissionResponse;
 import com.ufu.domain.itemsubmission.presentation.dto.response.ItemSubmissionApprovalResponse;
+import com.ufu.domain.itemsubmission.presentation.dto.response.ItemSubmissionCombinationResponse;
 import com.ufu.domain.itemsubmission.presentation.dto.response.ItemSubmissionRejectionResponse;
 import com.ufu.domain.itemsubmission.presentation.dto.response.ItemSubmissionSummaryResponse;
 import com.ufu.domain.itemsubmission.repository.ItemSubmissionRepository;
@@ -121,6 +124,7 @@ public class ItemSubmissionService {
                 .name(itemSubmission.getName())
                 .description(itemSubmission.getDescription())
                 .imageUrl(itemSubmission.getImageUrl())
+                .status(ItemStatus.GACHA)
                 .creator(itemSubmission.getSubmitter())
                 .approvedAt(itemSubmission.getApprovedAt())
                 .build();
@@ -134,6 +138,37 @@ public class ItemSubmissionService {
         userItemRepository.save(userItem);
 
         return new ItemSubmissionApprovalResponse(itemSubmission, item);
+    }
+
+    @Transactional
+    public ItemSubmissionCombinationResponse combine(String submissionId) {
+        ItemSubmission itemSubmission = itemSubmissionRepository.findBySubmissionId(submissionId)
+                .orElseThrow(() -> ItemSubmissionNotFoundException.EXCEPTION);
+
+        if (!itemSubmission.isPending()) {
+            throw ItemSubmissionNotCombinableException.EXCEPTION;
+        }
+
+        itemSubmission.combine(LocalDateTime.now());
+
+        Item item = Item.builder()
+                .name(itemSubmission.getName())
+                .description(itemSubmission.getDescription())
+                .imageUrl(itemSubmission.getImageUrl())
+                .status(ItemStatus.COMBINATION)
+                .creator(itemSubmission.getSubmitter())
+                .approvedAt(itemSubmission.getCombinedAt())
+                .build();
+        itemRepository.save(item);
+
+        UserItem userItem = UserItem.builder()
+                .user(itemSubmission.getSubmitter())
+                .item(item)
+                .quantity(1)
+                .build();
+        userItemRepository.save(userItem);
+
+        return new ItemSubmissionCombinationResponse(itemSubmission, item);
     }
 
     @Transactional

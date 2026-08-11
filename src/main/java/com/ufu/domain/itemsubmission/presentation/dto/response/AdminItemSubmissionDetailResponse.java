@@ -33,6 +33,9 @@ public class AdminItemSubmissionDetailResponse {
     @Schema(description = "승인 시간")
     private final LocalDateTime approvedAt;
 
+    @Schema(description = "조합 처리 시간")
+    private final LocalDateTime combinedAt;
+
     public AdminItemSubmissionDetailResponse(ItemSubmission itemSubmission) {
         this.submissionId = itemSubmission.getSubmissionId();
         this.name = itemSubmission.getName();
@@ -42,5 +45,6 @@ public class AdminItemSubmissionDetailResponse {
         this.status = itemSubmission.getStatus();
         this.createdAt = itemSubmission.getCreatedAt();
         this.approvedAt = itemSubmission.getApprovedAt();
+        this.combinedAt = itemSubmission.getCombinedAt();
     }
 }
