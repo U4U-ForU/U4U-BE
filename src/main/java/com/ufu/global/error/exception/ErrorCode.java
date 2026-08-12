@@ -35,7 +35,9 @@ public enum ErrorCode {
     TRADE_INVALID_ITEM_QUANTITY(400, "아이템은 총 1개 이상 10개 이하로 선택해야 합니다"),
     TRADE_INSUFFICIENT_ITEM_QUANTITY(400, "거래 가능한 아이템 수량이 부족합니다"),
     CAULDRON_RECIPE_NOT_FOUND(404, "조합법을 찾을 수 없습니다"),
-    CAULDRON_RECIPE_RESULT_ITEM_INVALID(400, "완성 아이템은 조합 아이템이어야 합니다");
+    CAULDRON_RECIPE_RESULT_ITEM_INVALID(400, "완성 아이템은 조합 아이템이어야 합니다"),
+    CAULDRON_RECIPE_RESULT_ITEM_IN_MATERIALS(400, "완성 아이템은 재료 아이템에 포함할 수 없습니다"),
+    CAULDRON_RECIPE_RESULT_ITEM_ALREADY_EXISTS(409, "이미 해당 완성 아이템의 활성 조합법이 있습니다");
 
     private final int status;
     private final String message;

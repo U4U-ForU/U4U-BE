@@ -42,6 +42,8 @@ public class AdminCauldronRecipeController {
             @ApiResponse(responseCode = "200", description = "조합법 생성 성공"),
             @ApiResponse(responseCode = "400", description = "조합법 요청이 올바르지 않음",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "완성 아이템의 활성 조합법이 이미 존재함",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = "인증 필요",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = "관리자 권한 필요",
@@ -86,6 +88,14 @@ public class AdminCauldronRecipeController {
     }
 
     @Operation(summary = "조합법 수정", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses({
+            @ApiResponse(responseCode = "400", description = "조합법 요청이 올바르지 않음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "완성 아이템의 활성 조합법이 이미 존재함",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "조합법 또는 아이템을 찾을 수 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
     @PatchMapping("/{recipeId}")
     public CauldronRecipeResponse update(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,

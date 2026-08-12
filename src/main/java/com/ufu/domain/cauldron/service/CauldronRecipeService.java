@@ -4,6 +4,8 @@ import com.ufu.domain.cauldron.domain.CauldronRecipe;
 import com.ufu.domain.cauldron.domain.CauldronRecipeMaterial;
 import com.ufu.domain.cauldron.domain.CauldronRecipeStatus;
 import com.ufu.domain.cauldron.exception.CauldronRecipeNotFoundException;
+import com.ufu.domain.cauldron.exception.CauldronRecipeResultItemAlreadyExistsException;
+import com.ufu.domain.cauldron.exception.CauldronRecipeResultItemInMaterialsException;
 import com.ufu.domain.cauldron.exception.CauldronRecipeResultItemInvalidException;
 import com.ufu.domain.cauldron.presentation.dto.request.CauldronRecipeRequest;
 import com.ufu.domain.cauldron.presentation.dto.response.CauldronRecipeDeleteResponse;
@@ -18,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -34,8 +37,10 @@ public class CauldronRecipeService {
 
     @Transactional
     public CauldronRecipeResponse create(CauldronRecipeRequest request) {
+        Item resultItem = getLockedCombinationResultItem(request.getResultItemId());
+        validateResultItemIsNotMaterial(request);
         List<Item> materials = getMaterialItems(request.getMaterialItemIds());
-        Item resultItem = getCombinationResultItem(request.getResultItemId());
+        validateNoActiveRecipeForResultItem(resultItem);
 
         CauldronRecipe recipe = cauldronRecipeRepository.save(CauldronRecipe.builder()
                 .resultItem(resultItem)
@@ -77,9 +82,14 @@ public class CauldronRecipeService {
 
     @Transactional
     public CauldronRecipeResponse update(String recipeId, CauldronRecipeRequest request) {
-        CauldronRecipe recipe = findActiveRecipe(recipeId);
+        CauldronRecipe recipe = findActiveRecipeForUpdate(recipeId);
+        Item resultItem = getLockedCombinationResultItem(
+                recipe.getResultItem().getItemId(),
+                request.getResultItemId()
+        );
+        validateResultItemIsNotMaterial(request);
         List<Item> materials = getMaterialItems(request.getMaterialItemIds());
-        Item resultItem = getCombinationResultItem(request.getResultItemId());
+        validateNoOtherActiveRecipeForResultItem(recipeId, resultItem);
 
         recipe.changeResultItem(resultItem);
         changeMaterials(recipe, materials);
@@ -89,7 +99,8 @@ public class CauldronRecipeService {
 
     @Transactional
     public CauldronRecipeDeleteResponse delete(String recipeId) {
-        CauldronRecipe recipe = findActiveRecipe(recipeId);
+        CauldronRecipe recipe = findActiveRecipeForUpdate(recipeId);
+        lockItems(recipe.getResultItem().getItemId());
         recipe.delete(LocalDateTime.now());
         return new CauldronRecipeDeleteResponse(recipe);
     }
@@ -99,15 +110,57 @@ public class CauldronRecipeService {
                 .orElseThrow(() -> CauldronRecipeNotFoundException.EXCEPTION);
     }
 
-    private Item getCombinationResultItem(String resultItemId) {
-        Item resultItem = itemRepository.findByItemId(resultItemId)
-                .orElseThrow(() -> ItemNotFoundException.EXCEPTION);
+    private CauldronRecipe findActiveRecipeForUpdate(String recipeId) {
+        return cauldronRecipeRepository
+                .findWithResultItemByRecipeIdAndStatusForUpdate(recipeId, CauldronRecipeStatus.ACTIVE)
+                .orElseThrow(() -> CauldronRecipeNotFoundException.EXCEPTION);
+    }
+
+    private Item getLockedCombinationResultItem(String... itemIds) {
+        Map<String, Item> itemsByItemId = lockItems(itemIds).stream()
+                .collect(Collectors.toMap(Item::getItemId, item -> item));
+        String resultItemId = itemIds[itemIds.length - 1];
+        Item resultItem = itemsByItemId.get(resultItemId);
+
+        if (resultItem == null) {
+            throw ItemNotFoundException.EXCEPTION;
+        }
 
         if (resultItem.getStatus() != ItemStatus.COMBINATION) {
             throw CauldronRecipeResultItemInvalidException.EXCEPTION;
         }
 
         return resultItem;
+    }
+
+    private List<Item> lockItems(String... itemIds) {
+        return itemRepository.findAllByItemIdInForUpdateOrderByIdAsc(
+                Arrays.stream(itemIds)
+                        .distinct()
+                        .toList()
+        );
+    }
+
+    private void validateResultItemIsNotMaterial(CauldronRecipeRequest request) {
+        if (request.getMaterialItemIds().contains(request.getResultItemId())) {
+            throw CauldronRecipeResultItemInMaterialsException.EXCEPTION;
+        }
+    }
+
+    private void validateNoActiveRecipeForResultItem(Item resultItem) {
+        if (cauldronRecipeRepository.existsByResultItemAndStatus(resultItem, CauldronRecipeStatus.ACTIVE)) {
+            throw CauldronRecipeResultItemAlreadyExistsException.EXCEPTION;
+        }
+    }
+
+    private void validateNoOtherActiveRecipeForResultItem(String recipeId, Item resultItem) {
+        if (cauldronRecipeRepository.existsByResultItemAndStatusAndRecipeIdNot(
+                resultItem,
+                CauldronRecipeStatus.ACTIVE,
+                recipeId
+        )) {
+            throw CauldronRecipeResultItemAlreadyExistsException.EXCEPTION;
+        }
     }
 
     private List<Item> getMaterialItems(List<String> materialItemIds) {
