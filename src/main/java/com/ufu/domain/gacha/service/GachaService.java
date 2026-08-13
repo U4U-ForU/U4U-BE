@@ -72,7 +72,7 @@ public class GachaService {
         Map<Item, Long> quantitiesByItem = pulledItems.stream()
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-        quantitiesByItem.forEach((item, quantity) -> userItemRepository.findByUserIdAndItemId(user.getId(), item.getId())
+        quantitiesByItem.forEach((item, quantity) -> userItemRepository.findByUserIdAndItemIdForUpdate(user.getId(), item.getId())
                 .ifPresentOrElse(
                         userItem -> userItem.increaseQuantity(quantity.intValue()),
                         () -> userItemRepository.save(UserItem.builder()

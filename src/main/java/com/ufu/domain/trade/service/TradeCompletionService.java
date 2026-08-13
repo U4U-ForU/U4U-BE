@@ -3,6 +3,7 @@ package com.ufu.domain.trade.service;
 import com.ufu.domain.item.domain.Item;
 import com.ufu.domain.trade.domain.TradeComment;
 import com.ufu.domain.trade.domain.TradeCommentItem;
+import com.ufu.domain.trade.domain.TradeCommentStatus;
 import com.ufu.domain.trade.domain.TradePost;
 import com.ufu.domain.trade.domain.TradePostItem;
 import com.ufu.domain.trade.exception.TradeCommentNotFoundException;
@@ -19,7 +20,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -44,6 +47,14 @@ public class TradeCompletionService {
         if (!acceptedComment.getTradePost().getId().equals(tradePost.getId()) || !acceptedComment.isPending()) {
             throw TradeCommentNotFoundException.EXCEPTION;
         }
+
+        List<TradeComment> pendingComments = tradeCommentRepository
+                .findAllByTradePostIdAndStatusOrderByCreatedAtAsc(tradePost.getId(), TradeCommentStatus.PENDING);
+        tradeTransactionService.lockUsers(Stream.concat(
+                        Stream.of(tradePost.getAuthor().getId()),
+                        pendingComments.stream().map(comment -> comment.getAuthor().getId())
+                )
+                .toList());
 
         tradeTransactionService.transferItems(
                 tradePost.getAuthor(),

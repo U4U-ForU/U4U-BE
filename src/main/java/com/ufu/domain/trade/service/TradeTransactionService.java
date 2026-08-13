@@ -8,6 +8,8 @@ import com.ufu.domain.trade.exception.TradeInsufficientItemQuantityException;
 import com.ufu.domain.trade.exception.TradeItemQuantityException;
 import com.ufu.domain.trade.presentation.dto.request.TradeItemRequest;
 import com.ufu.domain.user.domain.User;
+import com.ufu.domain.user.exception.UserNotFoundException;
+import com.ufu.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.LinkedHashMap;
@@ -20,8 +22,21 @@ import java.util.Optional;
 public class TradeTransactionService {
     private final ItemRepository itemRepository;
     private final UserItemRepository userItemRepository;
+    private final UserRepository userRepository;
+
+    public void lockUsers(List<Long> userIds) {
+        List<Long> distinctUserIds = userIds.stream()
+                .distinct()
+                .sorted()
+                .toList();
+
+        if (userRepository.findAllByIdInForUpdateOrderByIdAsc(distinctUserIds).size() != distinctUserIds.size()) {
+            throw UserNotFoundException.EXCEPTION;
+        }
+    }
 
     public Map<Item, Integer> reserveItems(Long userId, List<TradeItemRequest> requests) {
+        lockUsers(List.of(userId));
         Map<String, Integer> quantities = aggregateQuantities(requests);
         Map<Item, Integer> items = new LinkedHashMap<>();
 
@@ -43,6 +58,7 @@ public class TradeTransactionService {
     }
 
     public void releaseItems(User user, Map<Item, Integer> items) {
+        lockUsers(List.of(user.getId()));
         for (Map.Entry<Item, Integer> entry : items.entrySet()) {
             UserItem userItem = userItemRepository.findByUserIdAndItemItemIdForUpdate(user.getId(), entry.getKey().getItemId())
                     .orElseThrow(() -> TradeInsufficientItemQuantityException.EXCEPTION);
@@ -51,6 +67,7 @@ public class TradeTransactionService {
     }
 
     public void transferItems(User from, User to, Map<Item, Integer> items) {
+        lockUsers(List.of(from.getId(), to.getId()));
         for (Map.Entry<Item, Integer> entry : items.entrySet()) {
             Item item = entry.getKey();
             int quantity = entry.getValue();
@@ -58,6 +75,9 @@ public class TradeTransactionService {
                     .orElseThrow(() -> TradeInsufficientItemQuantityException.EXCEPTION);
 
             outgoing.transferReservedQuantity(quantity);
+            if (outgoing.isEmpty()) {
+                userItemRepository.delete(outgoing);
+            }
 
             Optional<UserItem> incoming = userItemRepository.findByUserIdAndItemIdForUpdate(to.getId(), item.getId());
             if (incoming.isPresent()) {

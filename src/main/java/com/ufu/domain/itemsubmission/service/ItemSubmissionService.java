@@ -130,8 +130,10 @@ public class ItemSubmissionService {
                 .build();
         itemRepository.save(item);
 
+        User user = userRepository.findByIdForUpdate(itemSubmission.getSubmitter().getId())
+                .orElseThrow(() -> UserNotFoundException.EXCEPTION);
         UserItem userItem = UserItem.builder()
-                .user(itemSubmission.getSubmitter())
+                .user(user)
                 .item(item)
                 .quantity(1)
                 .build();
@@ -161,8 +163,10 @@ public class ItemSubmissionService {
                 .build();
         itemRepository.save(item);
 
+        User user = userRepository.findByIdForUpdate(itemSubmission.getSubmitter().getId())
+                .orElseThrow(() -> UserNotFoundException.EXCEPTION);
         UserItem userItem = UserItem.builder()
-                .user(itemSubmission.getSubmitter())
+                .user(user)
                 .item(item)
                 .quantity(1)
                 .build();

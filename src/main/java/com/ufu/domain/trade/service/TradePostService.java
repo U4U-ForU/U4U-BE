@@ -28,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -105,6 +106,17 @@ public class TradePostService {
     public TradePostDeleteResponse deletePost(Long userId, String tradeId) {
         TradePost tradePost = findOpenPostForUpdate(tradeId);
         verifyAuthor(tradePost, userId);
+        tradeTransactionService.lockUsers(Stream.concat(
+                        Stream.of(tradePost.getAuthor().getId()),
+                        tradeCommentRepository
+                                .findAllByTradePostIdAndStatusOrderByCreatedAtAsc(
+                                        tradePost.getId(),
+                                        TradeCommentStatus.PENDING
+                                )
+                                .stream()
+                                .map(comment -> comment.getAuthor().getId())
+                )
+                .toList());
         tradeTransactionService.releaseItems(tradePost.getAuthor(), getPostItems(tradePost));
         tradeCommentService.deletePendingComments(tradePost, null);
         tradePost.delete();

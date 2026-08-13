@@ -86,6 +86,10 @@ public class UserItem extends BaseEntity {
 
     public void transferReservedQuantity(int amount) {
         releaseReservedQuantity(amount);
-        quantity -= amount;
+        decreaseQuantity(amount);
+    }
+
+    public boolean isEmpty() {
+        return quantity == 0 && reservedQuantity == 0;
     }
 }

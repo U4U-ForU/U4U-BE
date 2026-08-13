@@ -21,6 +21,7 @@ import com.ufu.domain.item.exception.ItemNotFoundException;
 import com.ufu.domain.item.repository.ItemRepository;
 import com.ufu.domain.item.repository.UserItemRepository;
 import com.ufu.domain.item.presentation.dto.response.MyItemSummaryResponse;
+import com.ufu.domain.user.domain.User;
 import com.ufu.domain.user.exception.UserNotFoundException;
 import com.ufu.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -92,6 +93,8 @@ public class CauldronRecipeService {
 
     @Transactional
     public CauldronRecombineResponse recombine(Long userId, String recipeId) {
+        User user = userRepository.findByIdForUpdate(userId)
+                .orElseThrow(() -> UserNotFoundException.EXCEPTION);
         CauldronRecipe recipe = findActiveRecipe(recipeId);
         Map<String, Integer> materialQuantities = getMaterialQuantities(recipe);
         List<UserItem> materialUserItems = getMaterialUserItems(userId, materialQuantities);
@@ -101,13 +104,17 @@ public class CauldronRecipeService {
                 materialQuantities.get(userItem.getItem().getItemId())
         ));
 
-        UserItem resultUserItem = addResultItem(userId, recipe.getResultItem());
+        UserItem resultUserItem = addResultItem(user, recipe.getResultItem());
         List<MyItemSummaryResponse> changedItems = Stream.concat(
                 materialUserItems.stream(),
                 Stream.of(resultUserItem)
         )
                 .map(MyItemSummaryResponse::new)
                 .toList();
+
+        materialUserItems.stream()
+                .filter(UserItem::isEmpty)
+                .forEach(userItemRepository::delete);
 
         return new CauldronRecombineResponse(
                 new MyItemSummaryResponse(resultUserItem),
@@ -219,7 +226,7 @@ public class CauldronRecipeService {
 
     private List<UserItem> getMaterialUserItems(Long userId, Map<String, Integer> materialQuantities) {
         return materialQuantities.keySet().stream()
-                .map(itemId -> userItemRepository.findByUserIdAndItemItemId(userId, itemId)
+                .map(itemId -> userItemRepository.findByUserIdAndItemItemIdForUpdate(userId, itemId)
                         .orElseThrow(() -> CauldronRecombineInsufficientItemQuantityException.EXCEPTION))
                 .toList();
     }
@@ -238,15 +245,14 @@ public class CauldronRecipeService {
         }
     }
 
-    private UserItem addResultItem(Long userId, Item resultItem) {
-        return userItemRepository.findByUserIdAndItemId(userId, resultItem.getId())
+    private UserItem addResultItem(User user, Item resultItem) {
+        return userItemRepository.findByUserIdAndItemIdForUpdate(user.getId(), resultItem.getId())
                 .map(userItem -> {
                     userItem.increaseQuantity(1);
                     return userItem;
                 })
                 .orElseGet(() -> userItemRepository.save(UserItem.builder()
-                        .user(userRepository.findById(userId)
-                                .orElseThrow(() -> UserNotFoundException.EXCEPTION))
+                        .user(user)
                         .item(resultItem)
                         .quantity(1)
                         .build()));
