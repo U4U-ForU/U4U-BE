@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 @Getter
-@Schema(description = "관리자 아이템 목록 응답")
+@Schema(description = "아이템 요약 응답")
 public class AdminItemSummaryResponse {
     @Schema(description = "아이템 식별값")
     private final String itemId;

@@ -56,6 +56,10 @@ public class UserItem extends BaseEntity {
         this.quantity += amount;
     }
 
+    public void decreaseQuantity(int amount) {
+        this.quantity -= amount;
+    }
+
     public int getAvailableQuantity() {
         return quantity - reservedQuantity;
     }

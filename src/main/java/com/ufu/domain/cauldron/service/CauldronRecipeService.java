@@ -4,18 +4,25 @@ import com.ufu.domain.cauldron.domain.CauldronRecipe;
 import com.ufu.domain.cauldron.domain.CauldronRecipeMaterial;
 import com.ufu.domain.cauldron.domain.CauldronRecipeStatus;
 import com.ufu.domain.cauldron.exception.CauldronRecipeNotFoundException;
+import com.ufu.domain.cauldron.exception.CauldronRecombineInsufficientItemQuantityException;
 import com.ufu.domain.cauldron.exception.CauldronRecipeResultItemAlreadyExistsException;
 import com.ufu.domain.cauldron.exception.CauldronRecipeResultItemInMaterialsException;
 import com.ufu.domain.cauldron.exception.CauldronRecipeResultItemInvalidException;
 import com.ufu.domain.cauldron.presentation.dto.request.CauldronRecipeRequest;
 import com.ufu.domain.cauldron.presentation.dto.response.CauldronRecipeDeleteResponse;
+import com.ufu.domain.cauldron.presentation.dto.response.CauldronRecombineResponse;
 import com.ufu.domain.cauldron.presentation.dto.response.CauldronRecipeResponse;
 import com.ufu.domain.cauldron.repository.CauldronRecipeMaterialRepository;
 import com.ufu.domain.cauldron.repository.CauldronRecipeRepository;
 import com.ufu.domain.item.domain.Item;
 import com.ufu.domain.item.domain.ItemStatus;
+import com.ufu.domain.item.domain.UserItem;
 import com.ufu.domain.item.exception.ItemNotFoundException;
 import com.ufu.domain.item.repository.ItemRepository;
+import com.ufu.domain.item.repository.UserItemRepository;
+import com.ufu.domain.item.presentation.dto.response.MyItemSummaryResponse;
+import com.ufu.domain.user.exception.UserNotFoundException;
+import com.ufu.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +42,8 @@ public class CauldronRecipeService {
     private final CauldronRecipeRepository cauldronRecipeRepository;
     private final CauldronRecipeMaterialRepository cauldronRecipeMaterialRepository;
     private final ItemRepository itemRepository;
+    private final UserItemRepository userItemRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public CauldronRecipeResponse create(CauldronRecipeRequest request) {
@@ -78,6 +88,31 @@ public class CauldronRecipeService {
     @Transactional(readOnly = true)
     public CauldronRecipeResponse get(String recipeId) {
         return toResponse(findActiveRecipe(recipeId));
+    }
+
+    @Transactional
+    public CauldronRecombineResponse recombine(Long userId, String recipeId) {
+        CauldronRecipe recipe = findActiveRecipe(recipeId);
+        Map<String, Integer> materialQuantities = getMaterialQuantities(recipe);
+        List<UserItem> materialUserItems = getMaterialUserItems(userId, materialQuantities);
+
+        validateMaterialQuantities(materialUserItems, materialQuantities);
+        materialUserItems.forEach(userItem -> userItem.decreaseQuantity(
+                materialQuantities.get(userItem.getItem().getItemId())
+        ));
+
+        UserItem resultUserItem = addResultItem(userId, recipe.getResultItem());
+        List<MyItemSummaryResponse> changedItems = Stream.concat(
+                materialUserItems.stream(),
+                Stream.of(resultUserItem)
+        )
+                .map(MyItemSummaryResponse::new)
+                .toList();
+
+        return new CauldronRecombineResponse(
+                new MyItemSummaryResponse(resultUserItem),
+                changedItems
+        );
     }
 
     @Transactional
@@ -168,6 +203,53 @@ public class CauldronRecipeService {
                 .map(itemId -> itemRepository.findByItemId(itemId)
                         .orElseThrow(() -> ItemNotFoundException.EXCEPTION))
                 .toList();
+    }
+
+    private Map<String, Integer> getMaterialQuantities(CauldronRecipe recipe) {
+        return cauldronRecipeMaterialRepository
+                .findAllWithItemByCauldronRecipeIdOrderBySlotNumberAsc(recipe.getId())
+                .stream()
+                .collect(Collectors.toMap(
+                        material -> material.getItem().getItemId(),
+                        material -> 1,
+                        Integer::sum,
+                        java.util.LinkedHashMap::new
+                ));
+    }
+
+    private List<UserItem> getMaterialUserItems(Long userId, Map<String, Integer> materialQuantities) {
+        return materialQuantities.keySet().stream()
+                .map(itemId -> userItemRepository.findByUserIdAndItemItemId(userId, itemId)
+                        .orElseThrow(() -> CauldronRecombineInsufficientItemQuantityException.EXCEPTION))
+                .toList();
+    }
+
+    private void validateMaterialQuantities(
+            List<UserItem> materialUserItems,
+            Map<String, Integer> materialQuantities
+    ) {
+        boolean hasInsufficientQuantity = materialUserItems.stream()
+                .anyMatch(userItem -> !userItem.hasAvailableQuantity(
+                        materialQuantities.get(userItem.getItem().getItemId())
+                ));
+
+        if (hasInsufficientQuantity) {
+            throw CauldronRecombineInsufficientItemQuantityException.EXCEPTION;
+        }
+    }
+
+    private UserItem addResultItem(Long userId, Item resultItem) {
+        return userItemRepository.findByUserIdAndItemId(userId, resultItem.getId())
+                .map(userItem -> {
+                    userItem.increaseQuantity(1);
+                    return userItem;
+                })
+                .orElseGet(() -> userItemRepository.save(UserItem.builder()
+                        .user(userRepository.findById(userId)
+                                .orElseThrow(() -> UserNotFoundException.EXCEPTION))
+                        .item(resultItem)
+                        .quantity(1)
+                        .build()));
     }
 
     private void saveMaterials(CauldronRecipe recipe, List<Item> materials) {

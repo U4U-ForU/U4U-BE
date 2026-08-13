@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
-@Schema(description = "관리자 조합법 응답")
+@Schema(description = "조합법 응답")
 public class CauldronRecipeResponse {
     @Schema(description = "조합법 식별값")
     private final String recipeId;
