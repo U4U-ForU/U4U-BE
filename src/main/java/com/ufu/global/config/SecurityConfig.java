@@ -97,6 +97,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/api/cauldron/recipes").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/cauldron/recipes/{recipeId}").authenticated()
                                 .requestMatchers(HttpMethod.POST, "/api/cauldron/recombine").authenticated()
+                                .requestMatchers(HttpMethod.POST, "/api/cauldron/mix").authenticated()
                                 .requestMatchers(HttpMethod.POST, "/api/trades").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/trades").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/trades/{tradeId}").authenticated()

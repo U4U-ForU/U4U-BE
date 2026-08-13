@@ -1,6 +1,8 @@
 package com.ufu.domain.cauldron.presentation;
 
+import com.ufu.domain.cauldron.presentation.dto.request.CauldronMixRequest;
 import com.ufu.domain.cauldron.presentation.dto.request.CauldronRecombineRequest;
+import com.ufu.domain.cauldron.presentation.dto.response.CauldronMixResponse;
 import com.ufu.domain.cauldron.presentation.dto.response.CauldronRecombineResponse;
 import com.ufu.domain.cauldron.presentation.dto.response.CauldronRecipeResponse;
 import com.ufu.domain.cauldron.service.CauldronRecipeService;
@@ -74,6 +76,26 @@ public class CauldronController {
             @Valid @RequestBody CauldronRecombineRequest request
     ) {
         return cauldronRecipeService.recombine(getUserId(customUserDetails), request.getRecipeId());
+    }
+
+    @Operation(summary = "아이템 섞기 실행", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "섞기 성공"),
+            @ApiResponse(responseCode = "400", description = "요청 값 또는 재료 아이템 수량 부족",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "인증 필요",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "아이템을 찾을 수 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "지급 가능한 섞기 결과가 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PostMapping("/mix")
+    public CauldronMixResponse mix(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @Valid @RequestBody CauldronMixRequest request
+    ) {
+        return cauldronRecipeService.mix(getUserId(customUserDetails), request.getMaterialItemIds());
     }
 
     private Long getUserId(CustomUserDetails customUserDetails) {

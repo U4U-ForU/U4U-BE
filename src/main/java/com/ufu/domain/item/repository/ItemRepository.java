@@ -13,6 +13,8 @@ import java.util.Optional;
 public interface ItemRepository extends JpaRepository<Item, Long> {
     Optional<Item> findByItemId(String itemId);
 
+    List<Item> findAllByItemIdIn(List<String> itemIds);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
             select item
@@ -23,6 +25,8 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findAllByItemIdInForUpdateOrderByIdAsc(@Param("itemIds") List<String> itemIds);
 
     List<Item> findAllByStatusOrderByApprovedAtDesc(ItemStatus status);
+
+    List<Item> findAllByStatusAndItemIdNotIn(ItemStatus status, List<String> itemIds);
 
     List<Item> findAllByOrderByApprovedAtDesc();
 }
