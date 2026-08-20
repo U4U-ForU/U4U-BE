@@ -17,7 +17,7 @@ public class MyItemDetailResponse {
     @Schema(description = "아이템 설명", example = "별빛을 모으는 고양이 아이템입니다.")
     private final String description;
 
-    @Schema(description = "아이템 이미지 URL", example = "/uploads/example.png")
+    @Schema(description = "아이템 이미지 URL", example = "https://example-bucket.s3.ap-northeast-2.amazonaws.com/items/example.png")
     private final String imageUrl;
 
     @Schema(description = "보유 수량", example = "3")

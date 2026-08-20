@@ -13,7 +13,7 @@ public class GachaResultResponse {
     @Schema(description = "아이템 이름", example = "우주 고양이")
     private final String name;
 
-    @Schema(description = "아이템 이미지 URL", example = "/uploads/example.png")
+    @Schema(description = "아이템 이미지 URL", example = "https://example-bucket.s3.ap-northeast-2.amazonaws.com/items/example.png")
     private final String imageUrl;
 
     public GachaResultResponse(Item item) {
