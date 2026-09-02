@@ -19,7 +19,6 @@ global
   entity
   error
   security
-  storage
 ```
 
 - Controller는 각 도메인의 `presentation`에 둡니다.
@@ -31,7 +30,6 @@ global
 - 공통 Entity 기반 클래스는 `global/entity`에 둡니다.
 - 예외 처리는 `global/error` 스타일을 따릅니다.
 - Security/JWT 코드는 `global/security` 아래에 둡니다.
-- 파일 저장처럼 외부 저장소로 교체 가능한 기능은 `global/storage`에 둡니다.
 - 현재 단계에서는 `global.response` 패키지를 만들지 않습니다.
 
 ## Java Import
@@ -72,9 +70,7 @@ global
 ## Image Fields
 
 - DB에는 이미지 파일 자체가 아니라 저장된 파일 경로 또는 URL 문자열만 저장합니다.
-- 현재 아이템 제출 API는 로컬 파일 저장 후 반환된 `/uploads/{fileName}` 형식의 경로를 저장합니다.
 - base64 data URL처럼 긴 이미지 본문을 DB에 직접 저장하지 않습니다.
-- S3 같은 외부 저장소가 필요해지면 `StorageService` 구현체를 교체하는 방식으로 확장합니다.
 
 ## Service
 
