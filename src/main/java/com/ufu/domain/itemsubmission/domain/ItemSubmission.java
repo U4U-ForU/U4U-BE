@@ -33,10 +33,10 @@ public class ItemSubmission extends BaseEntity {
     @Column(name = "submission_id", nullable = false, unique = true, length = 36)
     private String submissionId;
 
-    @Column(name = "name", nullable = false, length = 30)
+    @Column(name = "name", nullable = false, length = 15)
     private String name;
 
-    @Column(name = "description", nullable = false, length = 1000)
+    @Column(name = "description", nullable = false, length = 200)
     private String description;
 
     @Column(name = "image_url", nullable = false, length = 2048)

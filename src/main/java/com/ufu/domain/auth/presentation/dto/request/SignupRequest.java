@@ -12,15 +12,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Schema(description = "회원가입 요청")
 public class SignupRequest {
-    @NotBlank(message = "아이디는 필수입니다")
-    @Size(min = 4, max = 20, message = "아이디는 4자 이상 20자 이하로 입력해주세요")
-    @Pattern(regexp = "^[a-zA-Z0-9]+$", message = "아이디는 영문과 숫자만 사용할 수 있습니다")
+    @NotBlank(message = "로그인 아이디는 비어있을 수 없습니다.")
+    @Size(min = 4, max = 20, message = "로그인 아이디는 영문, 숫자 조합 4~20자로 입력해 주세요.")
     @Schema(description = "로그인 아이디", example = "test123")
     private String loginId;
 
-    @NotBlank(message = "비밀번호는 필수입니다")
-    @Size(min = 8, max = 64, message = "비밀번호는 8자 이상 64자 이하로 입력해주세요")
-    @Pattern(regexp = "^(?!.*[ㄱ-ㅎㅏ-ㅣ가-힣])\\S+$", message = "비밀번호에는 한글과 공백을 포함할 수 없습니다")
+    @NotBlank(message = "비밀번호는 비어있을 수 없습니다.")
+    @Size(min = 8, max = 20, message = "비밀번호는 영문, 숫자, 특수문자를 포함하여 8~20자로 입력해 주세요.")
+    @Pattern(regexp = "^(?!.*[ㄱ-ㅎㅏ-ㅣ가-힣])\\S+$", message = "비밀번호는 영문, 숫자, 특수문자를 포함하여 8~20자로 입력해 주세요.")
     @Schema(description = "비밀번호", example = "12345678")
     private String password;
 

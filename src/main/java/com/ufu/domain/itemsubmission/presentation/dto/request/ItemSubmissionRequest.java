@@ -13,12 +13,12 @@ import org.springframework.web.multipart.MultipartFile;
 @Schema(description = "아이템 제출 요청")
 public class ItemSubmissionRequest {
     @NotBlank(message = "아이템 이름은 필수입니다")
-    @Size(max = 30, message = "아이템 이름은 30자 이하로 입력해주세요")
+    @Size(max = 15, message = "아이템 이름은 15자 이하로 입력해주세요")
     @Schema(description = "아이템 이름", example = "우주 고양이")
     private String name;
 
     @NotBlank(message = "아이템 설명은 필수입니다")
-    @Size(max = 1000, message = "아이템 설명은 1000자 이하로 입력해주세요")
+    @Size(max = 200, message = "아이템 설명은 200자 이하로 입력해주세요")
     @Schema(description = "아이템 설명", example = "별빛을 모으는 고양이 아이템입니다.")
     private String description;
 
