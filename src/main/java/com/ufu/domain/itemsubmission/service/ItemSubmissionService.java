@@ -24,7 +24,7 @@ import com.ufu.domain.itemsubmission.repository.ItemSubmissionRepository;
 import com.ufu.domain.user.domain.User;
 import com.ufu.domain.user.exception.UserNotFoundException;
 import com.ufu.domain.user.repository.UserRepository;
-import com.ufu.global.storage.StorageService;
+import com.ufu.global.S3.S3Util;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,13 +38,13 @@ public class ItemSubmissionService {
     private final ItemRepository itemRepository;
     private final UserItemRepository userItemRepository;
     private final UserRepository userRepository;
-    private final StorageService storageService;
+    private final S3Util s3Util;
 
     @Transactional
     public ItemSubmissionResponse submit(Long submitterId, ItemSubmissionRequest request) {
         User submitter = userRepository.findById(submitterId)
                 .orElseThrow(() -> UserNotFoundException.EXCEPTION);
-        String imageUrl = storageService.store(request.getImage());
+        String imageUrl = s3Util.upload(request.getImage(), "submission");
 
         ItemSubmission itemSubmission = ItemSubmission.builder()
                 .name(request.getName())

@@ -1,4 +1,4 @@
-package com.ufu.global.storage.exception;
+package com.ufu.global.S3.exception;
 
 import com.ufu.global.error.exception.BusinessException;
 import com.ufu.global.error.exception.ErrorCode;
