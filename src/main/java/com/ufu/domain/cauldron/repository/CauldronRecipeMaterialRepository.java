@@ -1,12 +1,24 @@
 package com.ufu.domain.cauldron.repository;
 
 import com.ufu.domain.cauldron.domain.CauldronRecipeMaterial;
+import com.ufu.domain.cauldron.domain.CauldronRecipeStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface CauldronRecipeMaterialRepository extends JpaRepository<CauldronRecipeMaterial, Long> {
+    @Query("""
+            select recipe.resultItem.id as resultItemId,
+                   material.item.id as materialItemId
+            from CauldronRecipeMaterial material
+            join material.cauldronRecipe recipe
+            where recipe.status = :status
+            """)
+    List<CauldronRecipeDependencyProjection> findAllDependenciesByRecipeStatus(
+            @Param("status") CauldronRecipeStatus status
+    );
+
     @Query("""
             select material
             from CauldronRecipeMaterial material

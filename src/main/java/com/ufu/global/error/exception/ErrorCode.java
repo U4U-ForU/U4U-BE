@@ -50,6 +50,7 @@ public enum ErrorCode {
     CAULDRON_RECIPE_RESULT_ITEM_IN_MATERIALS(400, "완성 아이템은 재료 아이템에 포함할 수 없습니다"),
     CAULDRON_RECIPE_RESULT_ITEM_ALREADY_EXISTS(409, "이미 해당 완성 아이템의 활성 조합법이 있습니다"),
     CAULDRON_RECIPE_RESULT_ITEM_CHANGE_FORBIDDEN(400, "조합법의 완성 아이템은 변경할 수 없습니다"),
+    CAULDRON_RECIPE_DEPENDENCY_CYCLE(400, "순환 의존성이 발생하는 조합법은 등록할 수 없습니다"),
     CAULDRON_RECOMBINE_INSUFFICIENT_ITEM_QUANTITY(400, "재조합에 필요한 아이템 수량이 부족합니다"),
     // MIX
     CAULDRON_MIX_INSUFFICIENT_ITEM_QUANTITY(400, "섞기에 필요한 아이템 수량이 부족합니다"),

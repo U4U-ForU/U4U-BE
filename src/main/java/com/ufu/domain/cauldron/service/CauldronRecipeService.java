@@ -48,6 +48,7 @@ public class CauldronRecipeService {
 
     private final CauldronRecipeRepository cauldronRecipeRepository;
     private final CauldronRecipeMaterialRepository cauldronRecipeMaterialRepository;
+    private final CauldronRecipeDependencyValidator cauldronRecipeDependencyValidator;
     private final ItemRepository itemRepository;
     private final UserItemRepository userItemRepository;
     private final UserRepository userRepository;
@@ -58,6 +59,7 @@ public class CauldronRecipeService {
         validateResultItemIsNotMaterial(request);
         List<Item> materials = getMaterialItems(request.getMaterialItemIds());
         validateNoActiveRecipeForResultItem(resultItem);
+        validateNoDependencyCycle(resultItem, materials);
 
         CauldronRecipe recipe = cauldronRecipeRepository.save(CauldronRecipe.builder()
                 .resultItem(resultItem)
@@ -164,9 +166,10 @@ public class CauldronRecipeService {
     public CauldronRecipeResponse update(String recipeId, CauldronRecipeRequest request) {
         CauldronRecipe recipe = findActiveRecipeForUpdate(recipeId);
         validateResultItemIsUnchanged(recipe, request);
-        getLockedCombinationResultItem(recipe.getResultItem().getItemId());
+        Item resultItem = getLockedCombinationResultItem(recipe.getResultItem().getItemId());
         validateResultItemIsNotMaterial(request);
         List<Item> materials = getMaterialItems(request.getMaterialItemIds());
+        validateNoDependencyCycle(resultItem, materials);
 
         changeMaterials(recipe, materials);
 
@@ -233,6 +236,15 @@ public class CauldronRecipeService {
         if (cauldronRecipeRepository.existsByResultItemAndStatus(resultItem, CauldronRecipeStatus.ACTIVE)) {
             throw CauldronRecipeResultItemAlreadyExistsException.EXCEPTION;
         }
+    }
+
+    private void validateNoDependencyCycle(Item resultItem, List<Item> materials) {
+        cauldronRecipeDependencyValidator.validateNoCycle(
+                resultItem.getId(),
+                materials.stream()
+                        .map(Item::getId)
+                        .collect(Collectors.toSet())
+        );
     }
 
     private List<Item> getMaterialItems(List<String> materialItemIds) {
