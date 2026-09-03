@@ -17,6 +17,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.GeneratedColumn;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -35,6 +36,10 @@ public class ItemSubmission extends BaseEntity {
 
     @Column(name = "name", nullable = false, length = 15)
     private String name;
+
+    @GeneratedColumn("case when status in ('PENDING', 'APPROVED', 'COMBINED') then name else null end")
+    @Column(name = "reserved_name", unique = true, length = 15)
+    private String reservedName;
 
     @Column(name = "description", nullable = false, length = 200)
     private String description;

@@ -51,10 +51,6 @@ public class CauldronRecipe extends BaseEntity {
         this.status = CauldronRecipeStatus.ACTIVE;
     }
 
-    public void changeResultItem(Item resultItem) {
-        this.resultItem = resultItem;
-    }
-
     public void delete(LocalDateTime deletedAt) {
         this.status = CauldronRecipeStatus.DELETED;
         this.deletedAt = deletedAt;

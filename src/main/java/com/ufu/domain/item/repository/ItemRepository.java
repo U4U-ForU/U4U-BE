@@ -13,6 +13,8 @@ import java.util.Optional;
 public interface ItemRepository extends JpaRepository<Item, Long> {
     Optional<Item> findByItemId(String itemId);
 
+    boolean existsByName(String name);
+
     List<Item> findAllByItemIdIn(List<String> itemIds);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

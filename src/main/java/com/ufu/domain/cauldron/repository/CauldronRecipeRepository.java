@@ -47,9 +47,4 @@ public interface CauldronRecipeRepository extends JpaRepository<CauldronRecipe, 
 
     boolean existsByResultItemAndStatus(Item resultItem, CauldronRecipeStatus status);
 
-    boolean existsByResultItemAndStatusAndRecipeIdNot(
-            Item resultItem,
-            CauldronRecipeStatus status,
-            String recipeId
-    );
 }

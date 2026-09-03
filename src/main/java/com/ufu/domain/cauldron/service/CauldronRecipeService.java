@@ -8,6 +8,7 @@ import com.ufu.domain.cauldron.exception.CauldronMixResultItemNotAvailableExcept
 import com.ufu.domain.cauldron.exception.CauldronRecipeNotFoundException;
 import com.ufu.domain.cauldron.exception.CauldronRecombineInsufficientItemQuantityException;
 import com.ufu.domain.cauldron.exception.CauldronRecipeResultItemAlreadyExistsException;
+import com.ufu.domain.cauldron.exception.CauldronRecipeResultItemChangeForbiddenException;
 import com.ufu.domain.cauldron.exception.CauldronRecipeResultItemInMaterialsException;
 import com.ufu.domain.cauldron.exception.CauldronRecipeResultItemInvalidException;
 import com.ufu.domain.cauldron.presentation.dto.response.CauldronMixResponse;
@@ -162,15 +163,11 @@ public class CauldronRecipeService {
     @Transactional
     public CauldronRecipeResponse update(String recipeId, CauldronRecipeRequest request) {
         CauldronRecipe recipe = findActiveRecipeForUpdate(recipeId);
-        Item resultItem = getLockedCombinationResultItem(
-                recipe.getResultItem().getItemId(),
-                request.getResultItemId()
-        );
+        validateResultItemIsUnchanged(recipe, request);
+        getLockedCombinationResultItem(recipe.getResultItem().getItemId());
         validateResultItemIsNotMaterial(request);
         List<Item> materials = getMaterialItems(request.getMaterialItemIds());
-        validateNoOtherActiveRecipeForResultItem(recipeId, resultItem);
 
-        recipe.changeResultItem(resultItem);
         changeMaterials(recipe, materials);
 
         return toResponse(recipe);
@@ -226,18 +223,14 @@ public class CauldronRecipeService {
         }
     }
 
-    private void validateNoActiveRecipeForResultItem(Item resultItem) {
-        if (cauldronRecipeRepository.existsByResultItemAndStatus(resultItem, CauldronRecipeStatus.ACTIVE)) {
-            throw CauldronRecipeResultItemAlreadyExistsException.EXCEPTION;
+    private void validateResultItemIsUnchanged(CauldronRecipe recipe, CauldronRecipeRequest request) {
+        if (!recipe.getResultItem().getItemId().equals(request.getResultItemId())) {
+            throw CauldronRecipeResultItemChangeForbiddenException.EXCEPTION;
         }
     }
 
-    private void validateNoOtherActiveRecipeForResultItem(String recipeId, Item resultItem) {
-        if (cauldronRecipeRepository.existsByResultItemAndStatusAndRecipeIdNot(
-                resultItem,
-                CauldronRecipeStatus.ACTIVE,
-                recipeId
-        )) {
+    private void validateNoActiveRecipeForResultItem(Item resultItem) {
+        if (cauldronRecipeRepository.existsByResultItemAndStatus(resultItem, CauldronRecipeStatus.ACTIVE)) {
             throw CauldronRecipeResultItemAlreadyExistsException.EXCEPTION;
         }
     }

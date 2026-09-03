@@ -1,6 +1,7 @@
 package com.ufu.domain.itemsubmission.repository;
 
 import com.ufu.domain.itemsubmission.domain.ItemSubmission;
+import com.ufu.domain.itemsubmission.domain.ItemSubmissionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
@@ -11,4 +12,6 @@ public interface ItemSubmissionRepository extends JpaRepository<ItemSubmission, 
     List<ItemSubmission> findAllByOrderByCreatedAtDesc();
 
     Optional<ItemSubmission> findBySubmissionId(String submissionId);
+
+    boolean existsByNameAndStatusIn(String name, List<ItemSubmissionStatus> statuses);
 }

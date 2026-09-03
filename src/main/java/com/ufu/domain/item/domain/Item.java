@@ -34,7 +34,7 @@ public class Item extends BaseEntity {
     @Column(name = "public_item_id", nullable = false, unique = true, length = 36)
     private String itemId;
 
-    @Column(name = "name", nullable = false, length = 30)
+    @Column(name = "name", nullable = false, unique = true, length = 30)
     private String name;
 
     @Column(name = "description", nullable = false, length = 1000)

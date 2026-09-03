@@ -32,6 +32,7 @@ public enum ErrorCode {
     ITEM_SUBMISSION_NOT_FOUND(404, "아이템 제출 내역을 찾을 수 없습니다"),
     ITEM_SUBMISSION_FORBIDDEN(403, "해당 제출을 취소할 권한이 없습니다"),
     ITEM_SUBMISSION_NOT_PENDING(400, "심사 중인 제출만 취소할 수 있습니다"),
+    ITEM_SUBMISSION_NAME_ALREADY_EXISTS(409, "이미 사용 중인 아이템 이름입니다"),
     // TRADE-POST
     TRADE_POST_NOT_FOUND(404, "거래 게시물을 찾을 수 없습니다"),
     TRADE_COMMENT_NOT_FOUND(404, "거래 제안을 찾을 수 없습니다"),
@@ -48,6 +49,7 @@ public enum ErrorCode {
     CAULDRON_RECIPE_RESULT_ITEM_INVALID(400, "완성 아이템은 조합 아이템이어야 합니다"),
     CAULDRON_RECIPE_RESULT_ITEM_IN_MATERIALS(400, "완성 아이템은 재료 아이템에 포함할 수 없습니다"),
     CAULDRON_RECIPE_RESULT_ITEM_ALREADY_EXISTS(409, "이미 해당 완성 아이템의 활성 조합법이 있습니다"),
+    CAULDRON_RECIPE_RESULT_ITEM_CHANGE_FORBIDDEN(400, "조합법의 완성 아이템은 변경할 수 없습니다"),
     CAULDRON_RECOMBINE_INSUFFICIENT_ITEM_QUANTITY(400, "재조합에 필요한 아이템 수량이 부족합니다"),
     // MIX
     CAULDRON_MIX_INSUFFICIENT_ITEM_QUANTITY(400, "섞기에 필요한 아이템 수량이 부족합니다"),

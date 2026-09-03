@@ -60,4 +60,8 @@ public class User extends BaseEntity {
     public void deductCurrency(int amount) {
         this.currency -= amount;
     }
+
+    public void increaseCurrency(int amount) {
+        this.currency += amount;
+    }
 }

@@ -6,7 +6,9 @@ import com.ufu.domain.item.domain.UserItem;
 import com.ufu.domain.item.repository.ItemRepository;
 import com.ufu.domain.item.repository.UserItemRepository;
 import com.ufu.domain.itemsubmission.domain.ItemSubmission;
+import com.ufu.domain.itemsubmission.domain.ItemSubmissionStatus;
 import com.ufu.domain.itemsubmission.exception.ItemSubmissionForbiddenException;
+import com.ufu.domain.itemsubmission.exception.ItemSubmissionNameAlreadyExistsException;
 import com.ufu.domain.itemsubmission.exception.ItemSubmissionNotApprovableException;
 import com.ufu.domain.itemsubmission.exception.ItemSubmissionNotCombinableException;
 import com.ufu.domain.itemsubmission.exception.ItemSubmissionNotFoundException;
@@ -26,6 +28,7 @@ import com.ufu.domain.user.exception.UserNotFoundException;
 import com.ufu.domain.user.repository.UserRepository;
 import com.ufu.global.S3.S3Util;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
@@ -34,6 +37,12 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ItemSubmissionService {
+    private static final List<ItemSubmissionStatus> RESERVED_NAME_STATUSES = List.of(
+            ItemSubmissionStatus.PENDING,
+            ItemSubmissionStatus.APPROVED,
+            ItemSubmissionStatus.COMBINED
+    );
+
     private final ItemSubmissionRepository itemSubmissionRepository;
     private final ItemRepository itemRepository;
     private final UserItemRepository userItemRepository;
@@ -44,6 +53,7 @@ public class ItemSubmissionService {
     public ItemSubmissionResponse submit(Long submitterId, ItemSubmissionRequest request) {
         User submitter = userRepository.findById(submitterId)
                 .orElseThrow(() -> UserNotFoundException.EXCEPTION);
+        validateNameIsAvailable(request.getName());
         String imageUrl = s3Util.upload(request.getImage(), "submission");
 
         ItemSubmission itemSubmission = ItemSubmission.builder()
@@ -53,7 +63,18 @@ public class ItemSubmissionService {
                 .submitter(submitter)
                 .build();
 
-        return new ItemSubmissionResponse(itemSubmissionRepository.save(itemSubmission));
+        try {
+            return new ItemSubmissionResponse(itemSubmissionRepository.saveAndFlush(itemSubmission));
+        } catch (DataIntegrityViolationException exception) {
+            throw ItemSubmissionNameAlreadyExistsException.EXCEPTION;
+        }
+    }
+
+    private void validateNameIsAvailable(String name) {
+        if (itemRepository.existsByName(name)
+                || itemSubmissionRepository.existsByNameAndStatusIn(name, RESERVED_NAME_STATUSES)) {
+            throw ItemSubmissionNameAlreadyExistsException.EXCEPTION;
+        }
     }
 
     @Transactional(readOnly = true)

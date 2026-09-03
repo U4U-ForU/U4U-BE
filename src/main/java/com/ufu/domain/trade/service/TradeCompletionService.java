@@ -27,6 +27,8 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class TradeCompletionService {
+    private static final int TRADE_REWARD = 1;
+
     private final TradePostRepository tradePostRepository;
     private final TradePostItemRepository tradePostItemRepository;
     private final TradeCommentRepository tradeCommentRepository;
@@ -66,6 +68,8 @@ public class TradeCompletionService {
                 tradePost.getAuthor(),
                 getCommentItems(acceptedComment)
         );
+        tradePost.getAuthor().increaseCurrency(TRADE_REWARD);
+        acceptedComment.getAuthor().increaseCurrency(TRADE_REWARD);
 
         acceptedComment.accept();
         tradeCommentService.deletePendingComments(tradePost, acceptedComment.getCommentId());
