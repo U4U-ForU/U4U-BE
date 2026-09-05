@@ -19,8 +19,11 @@ public class SignupRequest {
 
     @NotBlank(message = "비밀번호는 비어있을 수 없습니다.")
     @Size(min = 8, max = 20, message = "비밀번호는 영문, 숫자, 특수문자를 포함하여 8~20자로 입력해 주세요.")
-    @Pattern(regexp = "^(?!.*[ㄱ-ㅎㅏ-ㅣ가-힣])\\S+$", message = "비밀번호는 영문, 숫자, 특수문자를 포함하여 8~20자로 입력해 주세요.")
-    @Schema(description = "비밀번호", example = "12345678")
+    @Pattern(
+            regexp = "^(?=.*[A-Za-z])(?=.*[0-9])(?=.*[^A-Za-z0-9])[\\x21-\\x7E]{8,20}$",
+            message = "비밀번호는 영문, 숫자, 특수문자를 모두 포함하여 8~20자로 입력해 주세요."
+    )
+    @Schema(description = "비밀번호 (영문 + 숫자 + 특수문자 조합 8~20자)", example = "ufuItem1!")
     private String password;
 
     @Email(message = "이메일 형식이 올바르지 않습니다")
