@@ -119,6 +119,10 @@ public class SecurityConfig {
                                 // 위에 명시하지 않은 관리자 경로가 로그인 사용자에게 열리지 않도록 막는다
                                 .requestMatchers("/api/admin/**").hasAuthority(Role.ADMIN.name())
 
+                                // 뽑기
+                                .requestMatchers(HttpMethod.GET, "/api/gacha/currency").authenticated()
+                                .requestMatchers(HttpMethod.POST, "/api/gacha/pull").authenticated()
+
                                 // 가마솥
                                 .requestMatchers(HttpMethod.GET, "/api/cauldron/recipes").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/cauldron/recipes/{recipeId}").authenticated()
