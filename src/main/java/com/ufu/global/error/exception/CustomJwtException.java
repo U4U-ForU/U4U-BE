@@ -5,6 +5,12 @@ public class CustomJwtException extends RuntimeException {
         super(message);
     }
 
+    public static class InvalidTypeException extends CustomJwtException {
+        public InvalidTypeException() {
+            super("토큰 종류가 올바르지 않습니다.");
+        }
+    }
+
     public static class ExpiredException extends CustomJwtException {
         public ExpiredException() {
             super("JWT 토큰이 만료되었습니다");

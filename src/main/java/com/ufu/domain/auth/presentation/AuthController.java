@@ -1,6 +1,7 @@
 package com.ufu.domain.auth.presentation;
 
 import com.ufu.domain.auth.presentation.dto.request.LoginRequest;
+import com.ufu.domain.auth.presentation.dto.request.RefreshTokenRequest;
 import com.ufu.domain.auth.presentation.dto.request.SignupRequest;
 import com.ufu.domain.auth.presentation.dto.response.SignupResponse;
 import com.ufu.domain.auth.presentation.dto.response.TokenResponse;
@@ -54,5 +55,21 @@ public class AuthController {
     @ResponseStatus(HttpStatus.OK)
     public TokenResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
+    }
+
+    @Operation(summary = "토큰 재발급")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "토큰 재발급 성공"),
+            @ApiResponse(responseCode = "400", description = "요청 값 오류",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Refresh Token이 유효하지 않거나 만료됨",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PostMapping("/refresh")
+    @ResponseStatus(HttpStatus.OK)
+    public TokenResponse refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        return authService.refresh(request);
     }
 }

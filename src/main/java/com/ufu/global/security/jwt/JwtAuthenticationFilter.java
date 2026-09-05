@@ -24,7 +24,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
-        return path.equals("/api/auth/login") || path.equals("/api/auth/signup");
+        return path.equals("/api/auth/login")
+                || path.equals("/api/auth/signup")
+                || path.equals("/api/auth/refresh");
     }
 
     @Override
@@ -35,7 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws IOException, ServletException {
         try {
             String parseToken = jwtTokenProvider.resolveToken(request);
-            if (parseToken != null && jwtTokenProvider.validateToken(parseToken)) {
+            if (parseToken != null && jwtTokenProvider.validateToken(parseToken, JwtTokenProvider.ACCESS_TYPE)) {
                 Authentication authentication = jwtTokenProvider.getAuthentication(parseToken);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }

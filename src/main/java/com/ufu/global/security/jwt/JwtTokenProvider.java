@@ -8,6 +8,7 @@ import com.ufu.global.error.exception.CustomJwtException;
 import com.ufu.global.security.auth.CustomUserDetailsService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -23,6 +24,11 @@ import java.util.Date;
 @Component
 @RequiredArgsConstructor
 public class JwtTokenProvider {
+    public static final String ACCESS_TYPE = "access";
+    public static final String REFRESH_TYPE = "refresh";
+
+    private static final String TYPE_HEADER = "type";
+
     private final JwtProperty jwtProperty;
     private final CustomUserDetailsService customUserDetailsService;
     private final RefreshTokenRepository refreshTokenRepository;
@@ -39,11 +45,11 @@ public class JwtTokenProvider {
     }
 
     public String generateAccessToken(String loginId, Role role) {
-        return generateToken(loginId, role, "access", jwtProperty.getAccessExp());
+        return generateToken(loginId, role, ACCESS_TYPE, jwtProperty.getAccessExp());
     }
 
     public String generateRefreshToken(String loginId, Role role) {
-        String refreshToken = generateToken(loginId, role, "refresh", jwtProperty.getRefreshExp());
+        String refreshToken = generateToken(loginId, role, REFRESH_TYPE, jwtProperty.getRefreshExp());
         refreshTokenRepository.save(RefreshToken.builder()
                 .loginId(loginId)
                 .token(refreshToken)
@@ -57,7 +63,7 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .signWith(SignatureAlgorithm.HS256, jwtProperty.getSecretKey())
                 .setSubject(loginId)
-                .setHeaderParam("type", type)
+                .setHeaderParam(TYPE_HEADER, type)
                 .claim("authority", role)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + exp * 1000))
@@ -76,12 +82,16 @@ public class JwtTokenProvider {
         return null;
     }
 
-    public boolean validateToken(String token) {
+    public boolean validateToken(String token, String expectedType) {
         try {
-            Jwts.parserBuilder()
+            Jws<Claims> jws = Jwts.parserBuilder()
                     .setSigningKey(jwtProperty.getSecretKey())
                     .build()
                     .parseClaimsJws(token);
+
+            if (!expectedType.equals(jws.getHeader().get(TYPE_HEADER))) {
+                throw new CustomJwtException.InvalidTypeException();
+            }
 
             return true;
         } catch (SignatureException e) {
@@ -93,6 +103,10 @@ public class JwtTokenProvider {
         } catch (IllegalArgumentException e) {
             throw new CustomJwtException.IllegalArgumentException();
         }
+    }
+
+    public String getSubject(String token) {
+        return getTokenBody(token).getSubject();
     }
 
     public Authentication getAuthentication(String token) {
