@@ -80,14 +80,6 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
 
-                                // API 문서
-                                .requestMatchers(
-                                        "/swagger-ui/**",
-                                        "/swagger-ui.html",
-                                        "/v3/api-docs",
-                                        "/v3/api-docs/**"
-                                ).permitAll()
-
                                 // 아이템 제출
                                 .requestMatchers(HttpMethod.POST, "/api/items/submissions").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/items/submissions/me").authenticated()
