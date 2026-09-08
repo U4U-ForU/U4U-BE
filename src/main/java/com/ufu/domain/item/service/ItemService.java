@@ -12,10 +12,8 @@ import com.ufu.domain.item.presentation.dto.response.AdminItemSummaryResponse;
 import com.ufu.domain.item.repository.ItemRepository;
 import com.ufu.domain.item.repository.UserItemRepository;
 import com.ufu.domain.trade.domain.TradeComment;
-import com.ufu.domain.trade.domain.TradeCommentItem;
 import com.ufu.domain.trade.domain.TradeCommentStatus;
 import com.ufu.domain.trade.domain.TradePost;
-import com.ufu.domain.trade.domain.TradePostItem;
 import com.ufu.domain.trade.domain.TradePostStatus;
 import com.ufu.domain.trade.presentation.dto.response.TradeItemResponse;
 import com.ufu.domain.trade.repository.TradeCommentItemRepository;
@@ -28,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -72,16 +72,34 @@ public class ItemService {
 
     @Transactional(readOnly = true)
     public List<MyTradingItemGroupResponse> getMyTradingItems(Long userId) {
-        Stream<MyTradingItemGroupResponse> posts = tradePostRepository
-                .findAllByAuthorIdAndStatusOrderByCreatedAtDesc(userId, TradePostStatus.OPEN)
-                .stream()
-                .map(this::toPostTradingResponse);
-
-        Stream<MyTradingItemGroupResponse> comments = tradeCommentRepository
-                .findAllByAuthorIdAndStatusOrderByCreatedAtDesc(userId, TradeCommentStatus.PENDING)
+        List<TradePost> tradePosts = tradePostRepository
+                .findAllByAuthorIdAndStatusOrderByCreatedAtDesc(userId, TradePostStatus.OPEN);
+        List<TradeComment> tradeComments = tradeCommentRepository
+                .findAllWithTradePostByAuthorIdAndStatusOrderByCreatedAtDesc(userId, TradeCommentStatus.PENDING)
                 .stream()
                 .filter(comment -> comment.getTradePost().isOpen())
-                .map(this::toCommentTradingResponse);
+                .toList();
+
+        Map<Long, List<TradeItemResponse>> itemsByPostId = getItemResponsesByPostId(tradePosts);
+        Map<Long, List<TradeItemResponse>> itemsByCommentId = getItemResponsesByCommentId(tradeComments);
+
+        Stream<MyTradingItemGroupResponse> posts = tradePosts.stream()
+                .map(tradePost -> new MyTradingItemGroupResponse(
+                        "POST",
+                        tradePost.getTradeId(),
+                        tradePost.getTitle(),
+                        itemsByPostId.getOrDefault(tradePost.getId(), List.of()),
+                        tradePost.getCreatedAt()
+                ));
+
+        Stream<MyTradingItemGroupResponse> comments = tradeComments.stream()
+                .map(tradeComment -> new MyTradingItemGroupResponse(
+                        "COMMENT",
+                        tradeComment.getTradePost().getTradeId(),
+                        tradeComment.getTradePost().getTitle(),
+                        itemsByCommentId.getOrDefault(tradeComment.getId(), List.of()),
+                        tradeComment.getCreatedAt()
+                ));
 
         return Stream.concat(posts, comments)
                 .sorted(Comparator.comparing(MyTradingItemGroupResponse::getCreatedAt).reversed())
@@ -103,33 +121,43 @@ public class ItemService {
         };
     }
 
-    private MyTradingItemGroupResponse toPostTradingResponse(TradePost tradePost) {
-        List<TradeItemResponse> items = tradePostItemRepository.findAllByTradePostId(tradePost.getId())
-                .stream()
-                .map(item -> new TradeItemResponse(item.getItem(), item.getQuantity()))
-                .toList();
+    private Map<Long, List<TradeItemResponse>> getItemResponsesByPostId(List<TradePost> tradePosts) {
+        if (tradePosts.isEmpty()) {
+            return Map.of();
+        }
 
-        return new MyTradingItemGroupResponse(
-                "POST",
-                tradePost.getTradeId(),
-                tradePost.getTitle(),
-                items,
-                tradePost.getCreatedAt()
-        );
+        return tradePostItemRepository.findAllWithItemByTradePostIdIn(
+                        tradePosts.stream()
+                                .map(TradePost::getId)
+                                .toList()
+                )
+                .stream()
+                .collect(Collectors.groupingBy(
+                        tradePostItem -> tradePostItem.getTradePost().getId(),
+                        Collectors.mapping(
+                                item -> new TradeItemResponse(item.getItem(), item.getQuantity()),
+                                Collectors.toList()
+                        )
+                ));
     }
 
-    private MyTradingItemGroupResponse toCommentTradingResponse(TradeComment tradeComment) {
-        List<TradeItemResponse> items = tradeCommentItemRepository.findAllByTradeCommentId(tradeComment.getId())
-                .stream()
-                .map(item -> new TradeItemResponse(item.getItem(), item.getQuantity()))
-                .toList();
+    private Map<Long, List<TradeItemResponse>> getItemResponsesByCommentId(List<TradeComment> tradeComments) {
+        if (tradeComments.isEmpty()) {
+            return Map.of();
+        }
 
-        return new MyTradingItemGroupResponse(
-                "COMMENT",
-                tradeComment.getTradePost().getTradeId(),
-                tradeComment.getTradePost().getTitle(),
-                items,
-                tradeComment.getCreatedAt()
-        );
+        return tradeCommentItemRepository.findAllWithItemByTradeCommentIdIn(
+                        tradeComments.stream()
+                                .map(TradeComment::getId)
+                                .toList()
+                )
+                .stream()
+                .collect(Collectors.groupingBy(
+                        tradeCommentItem -> tradeCommentItem.getTradeComment().getId(),
+                        Collectors.mapping(
+                                item -> new TradeItemResponse(item.getItem(), item.getQuantity()),
+                                Collectors.toList()
+                        )
+                ));
     }
 }

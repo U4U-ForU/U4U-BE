@@ -99,13 +99,39 @@ public class TradeCommentService {
 
     @Transactional(readOnly = true)
     public List<TradeCommentResponse> getPendingComments(Long tradePostId) {
-        return tradeCommentRepository.findAllByTradePostIdAndStatusOrderByCreatedAtAsc(
-                        tradePostId,
-                        TradeCommentStatus.PENDING
-                )
-                .stream()
-                .map(this::toResponse)
+        List<TradeComment> comments = tradeCommentRepository
+                .findAllByTradePostIdAndStatusOrderByCreatedAtAsc(tradePostId, TradeCommentStatus.PENDING);
+
+        if (comments.isEmpty()) {
+            return List.of();
+        }
+
+        Map<Long, List<TradeItemResponse>> itemsByCommentId = getItemResponsesByCommentId(
+                comments.stream()
+                        .map(TradeComment::getId)
+                        .toList()
+        );
+
+        return comments.stream()
+                .map(comment -> new TradeCommentResponse(
+                        comment.getCommentId(),
+                        comment.getAuthor().getLoginId(),
+                        itemsByCommentId.getOrDefault(comment.getId(), List.of()),
+                        comment.getCreatedAt()
+                ))
                 .toList();
+    }
+
+    private Map<Long, List<TradeItemResponse>> getItemResponsesByCommentId(List<Long> tradeCommentIds) {
+        return tradeCommentItemRepository.findAllWithItemByTradeCommentIdIn(tradeCommentIds)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        tradeCommentItem -> tradeCommentItem.getTradeComment().getId(),
+                        Collectors.mapping(
+                                item -> new TradeItemResponse(item.getItem(), item.getQuantity()),
+                                Collectors.toList()
+                        )
+                ));
     }
 
     @Transactional
@@ -137,7 +163,7 @@ public class TradeCommentService {
     }
 
     private Map<Item, Integer> getCommentItems(TradeComment tradeComment) {
-        return tradeCommentItemRepository.findAllByTradeCommentId(tradeComment.getId())
+        return tradeCommentItemRepository.findAllWithItemByTradeCommentId(tradeComment.getId())
                 .stream()
                 .collect(Collectors.toMap(
                         TradeCommentItem::getItem,
@@ -149,7 +175,7 @@ public class TradeCommentService {
 
     private TradeCommentResponse toResponse(TradeComment tradeComment) {
         List<TradeItemResponse> items = tradeCommentItemRepository
-                .findAllByTradeCommentId(tradeComment.getId())
+                .findAllWithItemByTradeCommentId(tradeComment.getId())
                 .stream()
                 .map(item -> new TradeItemResponse(item.getItem(), item.getQuantity()))
                 .toList();

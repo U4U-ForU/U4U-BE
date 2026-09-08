@@ -100,7 +100,7 @@ public class TradeCompletionService {
     private Map<Item, Integer> getPostItems(TradePost tradePost) {
         Map<Item, Integer> items = new LinkedHashMap<>();
 
-        for (TradePostItem item : tradePostItemRepository.findAllByTradePostId(tradePost.getId())) {
+        for (TradePostItem item : tradePostItemRepository.findAllWithItemByTradePostId(tradePost.getId())) {
             items.merge(item.getItem(), item.getQuantity(), Integer::sum);
         }
 
@@ -110,7 +110,7 @@ public class TradeCompletionService {
     private Map<Item, Integer> getCommentItems(TradeComment tradeComment) {
         Map<Item, Integer> items = new LinkedHashMap<>();
 
-        for (TradeCommentItem item : tradeCommentItemRepository.findAllByTradeCommentId(tradeComment.getId())) {
+        for (TradeCommentItem item : tradeCommentItemRepository.findAllWithItemByTradeCommentId(tradeComment.getId())) {
             items.merge(item.getItem(), item.getQuantity(), Integer::sum);
         }
 

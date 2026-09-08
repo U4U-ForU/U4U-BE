@@ -15,6 +15,7 @@ import com.ufu.domain.trade.presentation.dto.response.TradeItemResponse;
 import com.ufu.domain.trade.presentation.dto.response.TradePostDeleteResponse;
 import com.ufu.domain.trade.presentation.dto.response.TradePostDetailResponse;
 import com.ufu.domain.trade.presentation.dto.response.TradePostSummaryResponse;
+import com.ufu.domain.trade.repository.TradeCommentCountProjection;
 import com.ufu.domain.trade.repository.TradeCommentRepository;
 import com.ufu.domain.trade.repository.TradePostItemRepository;
 import com.ufu.domain.trade.repository.TradePostRepository;
@@ -68,9 +69,28 @@ public class TradePostService {
 
     @Transactional(readOnly = true)
     public List<TradePostSummaryResponse> getPosts() {
-        return tradePostRepository.findAllByStatusOrderByCreatedAtDesc(TradePostStatus.OPEN)
-                .stream()
-                .map(this::toSummaryResponse)
+        List<TradePost> tradePosts = tradePostRepository
+                .findAllWithAuthorByStatusOrderByCreatedAtDesc(TradePostStatus.OPEN);
+
+        if (tradePosts.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> tradePostIds = tradePosts.stream()
+                .map(TradePost::getId)
+                .toList();
+        Map<Long, List<TradeItemResponse>> itemsByPostId = getItemResponsesByPostId(tradePostIds);
+        Map<Long, Long> commentCountsByPostId = getPendingCommentCountsByPostId(tradePostIds);
+
+        return tradePosts.stream()
+                .map(tradePost -> new TradePostSummaryResponse(
+                        tradePost.getTradeId(),
+                        tradePost.getTitle(),
+                        tradePost.getAuthor().getLoginId(),
+                        itemsByPostId.getOrDefault(tradePost.getId(), List.of()),
+                        commentCountsByPostId.getOrDefault(tradePost.getId(), 0L).intValue(),
+                        tradePost.getCreatedAt()
+                ))
                 .toList();
     }
 
@@ -162,7 +182,7 @@ public class TradePostService {
     }
 
     private Map<Item, Integer> getPostItems(TradePost tradePost) {
-        return tradePostItemRepository.findAllByTradePostId(tradePost.getId())
+        return tradePostItemRepository.findAllWithItemByTradePostId(tradePost.getId())
                 .stream()
                 .collect(Collectors.toMap(
                         TradePostItem::getItem,
@@ -173,28 +193,32 @@ public class TradePostService {
     }
 
     private List<TradeItemResponse> getPostItemResponses(TradePost tradePost) {
-        return tradePostItemRepository.findAllByTradePostId(tradePost.getId())
+        return tradePostItemRepository.findAllWithItemByTradePostId(tradePost.getId())
                 .stream()
                 .map(item -> new TradeItemResponse(item.getItem(), item.getQuantity()))
                 .toList();
     }
 
-    private TradePostSummaryResponse toSummaryResponse(TradePost tradePost) {
-        int commentCount = tradeCommentRepository
-                .findAllByTradePostIdAndStatusOrderByCreatedAtAsc(
-                        tradePost.getId(),
-                        TradeCommentStatus.PENDING
-                )
-                .size();
+    private Map<Long, List<TradeItemResponse>> getItemResponsesByPostId(List<Long> tradePostIds) {
+        return tradePostItemRepository.findAllWithItemByTradePostIdIn(tradePostIds)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        tradePostItem -> tradePostItem.getTradePost().getId(),
+                        Collectors.mapping(
+                                item -> new TradeItemResponse(item.getItem(), item.getQuantity()),
+                                Collectors.toList()
+                        )
+                ));
+    }
 
-        return new TradePostSummaryResponse(
-                tradePost.getTradeId(),
-                tradePost.getTitle(),
-                tradePost.getAuthor().getLoginId(),
-                getPostItemResponses(tradePost),
-                commentCount,
-                tradePost.getCreatedAt()
-        );
+    private Map<Long, Long> getPendingCommentCountsByPostId(List<Long> tradePostIds) {
+        return tradeCommentRepository
+                .countByTradePostIdInAndStatus(tradePostIds, TradeCommentStatus.PENDING)
+                .stream()
+                .collect(Collectors.toMap(
+                        TradeCommentCountProjection::getTradePostId,
+                        TradeCommentCountProjection::getCommentCount
+                ));
     }
 
     private TradePostDetailResponse toDetailResponse(TradePost tradePost) {
