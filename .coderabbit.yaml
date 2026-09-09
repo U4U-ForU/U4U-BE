@@ -1,0 +1,50 @@
+reviews:
+  path_filters:
+    - "src/**"
+    - "AGENTS.md"
+    - "CONVENTIONS.md"
+    - "STORAGE.md"
+
+    - "!build/**"
+    - "!.gradle/**"
+    - "!uploads/**"
+    - "!**/.env"
+    - "!**/.DS_Store"
+    - "!**/*.log"
+
+  path_instructions:
+    - path: "src/main/java/**"
+      instructions: |
+        UFU 백엔드는 Spring Boot 기반 DDD-lite 구조입니다.
+        다음 기준으로 리뷰해주세요.
+        - Controller는 presentation, Service는 service, Entity는 domain, Repository는 repository 구조를 유지하는지 확인합니다.
+        - 비즈니스 로직이 Controller에 과하게 들어가지 않았는지 확인합니다.
+        - JWT/Auth/Security 구조는 기존 흐름을 임의로 바꾸지 않았는지 확인합니다.
+        - 사용자 인증이 필요한 API는 @AuthenticationPrincipal 또는 기존 인증 흐름을 통해 현재 사용자를 검증하는지 확인합니다.
+        - 본인 리소스만 조회/수정/취소 가능한지 권한 검증을 확인합니다.
+        - Request DTO validation이 적절한지 확인합니다.
+        - Response DTO가 목록용 SummaryResponse와 상세/생성/수정용 Response로 과하지 않게 분리되었는지 확인합니다.
+        - Entity는 protected 기본 생성자, 제한적인 Builder, EnumType.STRING 사용 컨벤션을 따르는지 확인합니다.
+        - 파일 저장은 DB에 파일 본문이 아니라 URL/path만 저장하는지 확인합니다.
+        - global.response 패키지는 현재 만들지 않는 컨벤션을 유지합니다.
+
+    - path: "src/main/resources/**"
+      instructions: |
+        Spring 설정 파일 리뷰 기준입니다.
+        - 민감 정보가 하드코딩되지 않았는지 확인합니다.
+        - datasource, jwt, redis, file upload 설정이 기존 application.yaml 스타일과 일관적인지 확인합니다.
+        - 불필요한 설정 변경이나 배포 환경 강제 설정이 들어가지 않았는지 확인합니다.
+
+    - path: "CONVENTIONS.md"
+      instructions: |
+        컨벤션 문서 리뷰 기준입니다.
+        - 실제 코드 스타일과 문서 내용이 어긋나지 않는지 확인합니다.
+        - 커밋 메시지 형식은 `type :: 내용` 기준을 유지합니다.
+        - 프론트/백엔드 공통으로 적용 가능한 규칙인지 확인합니다.
+
+    - path: "**/*.md"
+      instructions: |
+        문서 리뷰 기준입니다.
+        - 현재 프로젝트 상태와 맞지 않는 오래된 설명이 없는지 확인합니다.
+        - 사용자-facing 문구와 개발자용 설명이 섞이지 않았는지 확인합니다.
+        - 너무 장황하지 않고 실제 작업 시 참고 가능한 형태인지 확인합니다.
