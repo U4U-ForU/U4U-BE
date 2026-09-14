@@ -47,7 +47,7 @@ DDD-lite 구조이며, 기존 패키지 구조를 유지합니다.
 - 비즈니스 예외는 `BusinessException`을 상속한 전용 클래스를 만들고
   `static final EXCEPTION` 싱글턴으로 던진다. `new BusinessException(...)`을 직접 쓰지 않는다.
   (예: `throw TradePostNotFoundException.EXCEPTION;`)
-- 
+
 ## DTO
 - Request/Response를 분리하고, `presentation/dto/request`, `.../response`에 둔다.
 - 목록 조회는 필요한 최소 필드만 담는 `SummaryResponse`를 우선 검토한다.
