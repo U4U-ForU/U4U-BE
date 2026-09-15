@@ -3,7 +3,8 @@ package com.ufu.domain.gacha.presentation;
 import com.ufu.domain.gacha.presentation.dto.request.GachaPullRequest;
 import com.ufu.domain.gacha.presentation.dto.response.GachaCurrencyResponse;
 import com.ufu.domain.gacha.presentation.dto.response.GachaPullResponse;
-import com.ufu.domain.gacha.service.GachaService;
+import com.ufu.domain.gacha.service.GetGachaCurrencyService;
+import com.ufu.domain.gacha.service.PullGachaService;
 import com.ufu.domain.user.exception.UserNotFoundException;
 import com.ufu.global.security.auth.CustomUserDetails;
 import jakarta.validation.Valid;
@@ -19,11 +20,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/gacha")
 @RequiredArgsConstructor
 public class GachaController {
-    private final GachaService gachaService;
+    private final GetGachaCurrencyService getGachaCurrencyService;
+    private final PullGachaService pullGachaService;
 
     @GetMapping("/currency")
     public GachaCurrencyResponse getCurrency(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        return gachaService.getCurrency(getUserId(customUserDetails));
+        return getGachaCurrencyService.execute(getUserId(customUserDetails));
     }
 
     @PostMapping("/pull")
@@ -31,7 +33,7 @@ public class GachaController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @Valid @RequestBody GachaPullRequest request
     ) {
-        return gachaService.pull(getUserId(customUserDetails), request.getCount());
+        return pullGachaService.execute(getUserId(customUserDetails), request.getCount());
     }
 
     private Long getUserId(CustomUserDetails customUserDetails) {
