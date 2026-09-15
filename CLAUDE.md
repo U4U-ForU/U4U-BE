@@ -65,3 +65,13 @@ DDD-lite 구조이며, 기존 패키지 구조를 유지합니다.
 ./gradlew bootRun               # 로컬 실행
 ./gradlew build                 # 빌드 (테스트 포함)
 ```
+
+## Git
+- default 브랜치는 `develop`. 기능 작업은 최신 `develop`에서 분기한다.
+- 브랜치: `type/kebab-case-요약` (예: `feature/item-submission-api`)
+- 커밋: `type :: 한글 요약` (예: `feat :: 아이템 제출 API 추가`)
+  - 제목 끝에 마침표를 붙이지 않는다. 기술명/클래스명만 영어로 쓴다.
+- type: `feat` `fix` `refactor` `chore` `docs` `style` `rename` `remove`
+  - 브랜치는 `feature`, 커밋은 `feat`로 표기가 다르다.
+- 의미 있는 작업 단위로 커밋한다. 기능 구현·버그 수정·설정 변경·문서 수정은 분리한다.
+- (중요) Agent는 사용자 요청 없이 직접 커밋하지 않는다.
