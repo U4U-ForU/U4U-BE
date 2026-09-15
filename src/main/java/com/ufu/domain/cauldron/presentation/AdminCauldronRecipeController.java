@@ -3,7 +3,11 @@ package com.ufu.domain.cauldron.presentation;
 import com.ufu.domain.cauldron.presentation.dto.request.CauldronRecipeRequest;
 import com.ufu.domain.cauldron.presentation.dto.response.CauldronRecipeDeleteResponse;
 import com.ufu.domain.cauldron.presentation.dto.response.CauldronRecipeResponse;
-import com.ufu.domain.cauldron.service.CauldronRecipeService;
+import com.ufu.domain.cauldron.service.CreateCauldronRecipeService;
+import com.ufu.domain.cauldron.service.DeleteCauldronRecipeService;
+import com.ufu.domain.cauldron.service.GetCauldronRecipeDetailService;
+import com.ufu.domain.cauldron.service.GetCauldronRecipeListService;
+import com.ufu.domain.cauldron.service.UpdateCauldronRecipeService;
 import com.ufu.domain.itemsubmission.exception.AdminAccessDeniedException;
 import com.ufu.domain.user.domain.Role;
 import com.ufu.domain.user.exception.UserNotFoundException;
@@ -25,7 +29,11 @@ import java.util.List;
 @RequestMapping("/api/admin/cauldron/recipes")
 @RequiredArgsConstructor
 public class AdminCauldronRecipeController {
-    private final CauldronRecipeService cauldronRecipeService;
+    private final CreateCauldronRecipeService createCauldronRecipeService;
+    private final GetCauldronRecipeListService getCauldronRecipeListService;
+    private final GetCauldronRecipeDetailService getCauldronRecipeDetailService;
+    private final UpdateCauldronRecipeService updateCauldronRecipeService;
+    private final DeleteCauldronRecipeService deleteCauldronRecipeService;
 
     @PostMapping
     public CauldronRecipeResponse create(
@@ -33,7 +41,7 @@ public class AdminCauldronRecipeController {
             @Valid @RequestBody CauldronRecipeRequest request
     ) {
         validateAdmin(customUserDetails);
-        return cauldronRecipeService.create(request);
+        return createCauldronRecipeService.execute(request);
     }
 
     @GetMapping
@@ -41,7 +49,7 @@ public class AdminCauldronRecipeController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
         validateAdmin(customUserDetails);
-        return cauldronRecipeService.getAll();
+        return getCauldronRecipeListService.execute();
     }
 
     @GetMapping("/{recipeId}")
@@ -50,7 +58,7 @@ public class AdminCauldronRecipeController {
             @PathVariable String recipeId
     ) {
         validateAdmin(customUserDetails);
-        return cauldronRecipeService.get(recipeId);
+        return getCauldronRecipeDetailService.execute(recipeId);
     }
 
     @PatchMapping("/{recipeId}")
@@ -60,7 +68,7 @@ public class AdminCauldronRecipeController {
             @Valid @RequestBody CauldronRecipeRequest request
     ) {
         validateAdmin(customUserDetails);
-        return cauldronRecipeService.update(recipeId, request);
+        return updateCauldronRecipeService.execute(recipeId, request);
     }
 
     @DeleteMapping("/{recipeId}")
@@ -69,7 +77,7 @@ public class AdminCauldronRecipeController {
             @PathVariable String recipeId
     ) {
         validateAdmin(customUserDetails);
-        return cauldronRecipeService.delete(recipeId);
+        return deleteCauldronRecipeService.execute(recipeId);
     }
 
     private void validateAdmin(CustomUserDetails customUserDetails) {
