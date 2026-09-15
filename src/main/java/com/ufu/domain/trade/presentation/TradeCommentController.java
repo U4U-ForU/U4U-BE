@@ -3,8 +3,9 @@ package com.ufu.domain.trade.presentation;
 import com.ufu.domain.trade.presentation.dto.request.TradeCommentCreateRequest;
 import com.ufu.domain.trade.presentation.dto.response.TradeCommentResponse;
 import com.ufu.domain.trade.presentation.dto.response.TradeCompletionResponse;
-import com.ufu.domain.trade.service.TradeCommentService;
-import com.ufu.domain.trade.service.TradeCompletionService;
+import com.ufu.domain.trade.service.CancelTradeCommentService;
+import com.ufu.domain.trade.service.CompleteTradeService;
+import com.ufu.domain.trade.service.CreateTradeCommentService;
 import com.ufu.domain.user.exception.UserNotFoundException;
 import com.ufu.global.security.auth.CustomUserDetails;
 import jakarta.validation.Valid;
@@ -24,8 +25,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/trades/{tradeId}/comments")
 @RequiredArgsConstructor
 public class TradeCommentController {
-    private final TradeCommentService tradeCommentService;
-    private final TradeCompletionService tradeCompletionService;
+    private final CreateTradeCommentService createTradeCommentService;
+    private final CancelTradeCommentService cancelTradeCommentService;
+    private final CompleteTradeService completeTradeService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -34,7 +36,7 @@ public class TradeCommentController {
             @PathVariable String tradeId,
             @Valid @RequestBody TradeCommentCreateRequest request
     ) {
-        return tradeCommentService.createComment(getUserId(customUserDetails), tradeId, request);
+        return createTradeCommentService.execute(getUserId(customUserDetails), tradeId, request);
     }
 
     @DeleteMapping("/{commentId}")
@@ -43,7 +45,7 @@ public class TradeCommentController {
             @PathVariable String tradeId,
             @PathVariable String commentId
     ) {
-        return tradeCommentService.cancelComment(getUserId(customUserDetails), tradeId, commentId);
+        return cancelTradeCommentService.execute(getUserId(customUserDetails), tradeId, commentId);
     }
 
     @PatchMapping("/{commentId}/accept")
@@ -52,7 +54,7 @@ public class TradeCommentController {
             @PathVariable String tradeId,
             @PathVariable String commentId
     ) {
-        return tradeCompletionService.completeTrade(getUserId(customUserDetails), tradeId, commentId);
+        return completeTradeService.execute(getUserId(customUserDetails), tradeId, commentId);
     }
 
     private Long getUserId(CustomUserDetails customUserDetails) {

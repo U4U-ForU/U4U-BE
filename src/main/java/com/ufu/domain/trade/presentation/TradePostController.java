@@ -5,7 +5,11 @@ import com.ufu.domain.trade.presentation.dto.request.TradePostTitleUpdateRequest
 import com.ufu.domain.trade.presentation.dto.response.TradePostDeleteResponse;
 import com.ufu.domain.trade.presentation.dto.response.TradePostDetailResponse;
 import com.ufu.domain.trade.presentation.dto.response.TradePostSummaryResponse;
-import com.ufu.domain.trade.service.TradePostService;
+import com.ufu.domain.trade.service.CreateTradePostService;
+import com.ufu.domain.trade.service.DeleteTradePostService;
+import com.ufu.domain.trade.service.GetTradePostDetailService;
+import com.ufu.domain.trade.service.GetTradePostListService;
+import com.ufu.domain.trade.service.UpdateTradePostTitleService;
 import com.ufu.domain.user.exception.UserNotFoundException;
 import com.ufu.global.security.auth.CustomUserDetails;
 import jakarta.validation.Valid;
@@ -27,7 +31,11 @@ import java.util.List;
 @RequestMapping("/api/trades")
 @RequiredArgsConstructor
 public class TradePostController {
-    private final TradePostService tradePostService;
+    private final CreateTradePostService createTradePostService;
+    private final GetTradePostListService getTradePostListService;
+    private final GetTradePostDetailService getTradePostDetailService;
+    private final UpdateTradePostTitleService updateTradePostTitleService;
+    private final DeleteTradePostService deleteTradePostService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -35,17 +43,17 @@ public class TradePostController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @Valid @RequestBody TradePostCreateRequest request
     ) {
-        return tradePostService.createPost(getUserId(customUserDetails), request);
+        return createTradePostService.execute(getUserId(customUserDetails), request);
     }
 
     @GetMapping
     public List<TradePostSummaryResponse> getPosts() {
-        return tradePostService.getPosts();
+        return getTradePostListService.execute();
     }
 
     @GetMapping("/{tradeId}")
     public TradePostDetailResponse getPost(@PathVariable String tradeId) {
-        return tradePostService.getPost(tradeId);
+        return getTradePostDetailService.execute(tradeId);
     }
 
     @PatchMapping("/{tradeId}/title")
@@ -54,7 +62,7 @@ public class TradePostController {
             @PathVariable String tradeId,
             @Valid @RequestBody TradePostTitleUpdateRequest request
     ) {
-        return tradePostService.updateTitle(getUserId(customUserDetails), tradeId, request);
+        return updateTradePostTitleService.execute(getUserId(customUserDetails), tradeId, request);
     }
 
     @DeleteMapping("/{tradeId}")
@@ -62,7 +70,7 @@ public class TradePostController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PathVariable String tradeId
     ) {
-        return tradePostService.deletePost(getUserId(customUserDetails), tradeId);
+        return deleteTradePostService.execute(getUserId(customUserDetails), tradeId);
     }
 
     private Long getUserId(CustomUserDetails customUserDetails) {
