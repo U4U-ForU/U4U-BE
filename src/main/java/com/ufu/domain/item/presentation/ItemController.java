@@ -4,7 +4,9 @@ import com.ufu.domain.item.presentation.dto.request.ItemSortType;
 import com.ufu.domain.item.presentation.dto.response.MyItemDetailResponse;
 import com.ufu.domain.item.presentation.dto.response.MyItemSummaryResponse;
 import com.ufu.domain.item.presentation.dto.response.MyTradingItemGroupResponse;
-import com.ufu.domain.item.service.ItemService;
+import com.ufu.domain.item.service.GetMyItemDetailService;
+import com.ufu.domain.item.service.GetMyItemListService;
+import com.ufu.domain.item.service.GetMyTradingItemListService;
 import com.ufu.domain.user.exception.UserNotFoundException;
 import com.ufu.global.security.auth.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +22,9 @@ import java.util.List;
 @RequestMapping("/api/items/me")
 @RequiredArgsConstructor
 public class ItemController {
-    private final ItemService itemService;
+    private final GetMyItemListService getMyItemListService;
+    private final GetMyItemDetailService getMyItemDetailService;
+    private final GetMyTradingItemListService getMyTradingItemListService;
 
     @GetMapping
     public List<MyItemSummaryResponse> getMyItems(
@@ -28,7 +32,7 @@ public class ItemController {
             @RequestParam(defaultValue = "APPROVED_AT_DESC") ItemSortType sort,
             @RequestParam(required = false) String keyword
     ) {
-        return itemService.getMyItems(getUserId(customUserDetails), sort, keyword);
+        return getMyItemListService.execute(getUserId(customUserDetails), sort, keyword);
     }
 
     @GetMapping("/{itemId}")
@@ -36,14 +40,14 @@ public class ItemController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PathVariable String itemId
     ) {
-        return itemService.getMyItemDetail(getUserId(customUserDetails), itemId);
+        return getMyItemDetailService.execute(getUserId(customUserDetails), itemId);
     }
 
     @GetMapping("/trading")
     public List<MyTradingItemGroupResponse> getMyTradingItems(
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        return itemService.getMyTradingItems(getUserId(customUserDetails));
+        return getMyTradingItemListService.execute(getUserId(customUserDetails));
     }
 
     private Long getUserId(CustomUserDetails customUserDetails) {

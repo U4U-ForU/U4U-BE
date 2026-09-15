@@ -2,7 +2,6 @@ package com.ufu.domain.gacha.service;
 
 import com.ufu.domain.gacha.exception.GachaPoolEmptyException;
 import com.ufu.domain.gacha.exception.InsufficientCurrencyException;
-import com.ufu.domain.gacha.presentation.dto.response.GachaCurrencyResponse;
 import com.ufu.domain.gacha.presentation.dto.response.GachaPullResponse;
 import com.ufu.domain.gacha.presentation.dto.response.GachaResultResponse;
 import com.ufu.domain.item.domain.Item;
@@ -25,23 +24,15 @@ import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
-public class GachaService {
+public class PullGachaService {
     private static final int COST_PER_PULL = 2;
 
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
     private final UserItemRepository userItemRepository;
 
-    @Transactional(readOnly = true)
-    public GachaCurrencyResponse getCurrency(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> UserNotFoundException.EXCEPTION);
-
-        return new GachaCurrencyResponse(user);
-    }
-
     @Transactional
-    public GachaPullResponse pull(Long userId, int count) {
+    public GachaPullResponse execute(Long userId, int count) {
         User user = userRepository.findByIdForUpdate(userId)
                 .orElseThrow(() -> UserNotFoundException.EXCEPTION);
         List<Item> gachaPool = itemRepository.findAllByStatusOrderByApprovedAtDesc(ItemStatus.GACHA);

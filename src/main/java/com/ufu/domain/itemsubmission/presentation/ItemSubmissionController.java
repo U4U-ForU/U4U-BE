@@ -3,7 +3,10 @@ package com.ufu.domain.itemsubmission.presentation;
 import com.ufu.domain.itemsubmission.presentation.dto.request.ItemSubmissionRequest;
 import com.ufu.domain.itemsubmission.presentation.dto.response.ItemSubmissionResponse;
 import com.ufu.domain.itemsubmission.presentation.dto.response.ItemSubmissionSummaryResponse;
-import com.ufu.domain.itemsubmission.service.ItemSubmissionService;
+import com.ufu.domain.itemsubmission.service.CancelItemSubmissionService;
+import com.ufu.domain.itemsubmission.service.GetMySubmissionDetailService;
+import com.ufu.domain.itemsubmission.service.GetMySubmissionListService;
+import com.ufu.domain.itemsubmission.service.SubmitItemSubmissionService;
 import com.ufu.domain.user.exception.UserNotFoundException;
 import com.ufu.global.security.auth.CustomUserDetails;
 import jakarta.validation.Valid;
@@ -27,7 +30,10 @@ import java.util.List;
 @RequestMapping("/api/items/submissions")
 @RequiredArgsConstructor
 public class ItemSubmissionController {
-    private final ItemSubmissionService itemSubmissionService;
+    private final SubmitItemSubmissionService submitItemSubmissionService;
+    private final GetMySubmissionListService getMySubmissionListService;
+    private final GetMySubmissionDetailService getMySubmissionDetailService;
+    private final CancelItemSubmissionService cancelItemSubmissionService;
 
     @InitBinder
     public void initBinder(WebDataBinder binder) {
@@ -40,14 +46,14 @@ public class ItemSubmissionController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @Valid @ModelAttribute ItemSubmissionRequest request
     ) {
-        return itemSubmissionService.submit(getUserId(customUserDetails), request);
+        return submitItemSubmissionService.execute(getUserId(customUserDetails), request);
     }
 
     @GetMapping("/me")
     public List<ItemSubmissionSummaryResponse> getMySubmissions(
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        return itemSubmissionService.getMySubmissions(getUserId(customUserDetails));
+        return getMySubmissionListService.execute(getUserId(customUserDetails));
     }
 
     @GetMapping("/{submissionId}")
@@ -55,7 +61,7 @@ public class ItemSubmissionController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PathVariable String submissionId
     ) {
-        return itemSubmissionService.getMySubmission(getUserId(customUserDetails), submissionId);
+        return getMySubmissionDetailService.execute(getUserId(customUserDetails), submissionId);
     }
 
     @PatchMapping("/{submissionId}/cancel")
@@ -63,7 +69,7 @@ public class ItemSubmissionController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PathVariable String submissionId
     ) {
-        return itemSubmissionService.cancel(getUserId(customUserDetails), submissionId);
+        return cancelItemSubmissionService.execute(getUserId(customUserDetails), submissionId);
     }
 
     private Long getUserId(CustomUserDetails customUserDetails) {
