@@ -25,6 +25,8 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CauldronRecipe extends BaseEntity {
+    public static final int MATERIAL_COUNT = 3;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cauldron_recipe_id", nullable = false)
