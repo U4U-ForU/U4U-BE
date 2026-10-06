@@ -80,6 +80,9 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
 
+                                // 마이페이지
+                                .requestMatchers(HttpMethod.GET, "/api/users/me").authenticated()
+
                                 // 아이템 제출
                                 .requestMatchers(HttpMethod.POST, "/api/items/submissions").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/items/submissions/me").authenticated()
