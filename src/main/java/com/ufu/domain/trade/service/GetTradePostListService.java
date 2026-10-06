@@ -43,6 +43,7 @@ public class GetTradePostListService {
                         tradePost.getTradeId(),
                         tradePost.getTitle(),
                         tradePost.getAuthor().getLoginId(),
+                        tradePost.getAuthor().getNickname(),
                         itemsByPostId.getOrDefault(tradePost.getId(), List.of()),
                         commentCountsByPostId.getOrDefault(tradePost.getId(), 0L).intValue(),
                         tradePost.getCreatedAt()

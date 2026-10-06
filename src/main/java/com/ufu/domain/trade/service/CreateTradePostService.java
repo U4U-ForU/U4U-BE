@@ -45,6 +45,7 @@ public class CreateTradePostService {
                 tradePost.getTradeId(),
                 tradePost.getTitle(),
                 author.getLoginId(),
+                author.getNickname(),
                 itemResponses,
                 List.of(),
                 tradePost.getCreatedAt()

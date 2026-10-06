@@ -57,6 +57,7 @@ public class TradeCommentSupport {
                 .map(comment -> new TradeCommentResponse(
                         comment.getCommentId(),
                         comment.getAuthor().getLoginId(),
+                        comment.getAuthor().getNickname(),
                         itemsByCommentId.getOrDefault(comment.getId(), List.of()),
                         comment.getCreatedAt()
                 ))

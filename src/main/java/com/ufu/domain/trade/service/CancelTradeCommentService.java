@@ -57,6 +57,7 @@ public class CancelTradeCommentService {
         return new TradeCommentResponse(
                 tradeComment.getCommentId(),
                 tradeComment.getAuthor().getLoginId(),
+                tradeComment.getAuthor().getNickname(),
                 items,
                 tradeComment.getCreatedAt()
         );
