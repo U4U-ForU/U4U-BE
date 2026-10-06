@@ -82,6 +82,7 @@ public class SecurityConfig {
 
                                 // 마이페이지
                                 .requestMatchers(HttpMethod.GET, "/api/users/me").authenticated()
+                                .requestMatchers(HttpMethod.POST, "/api/users/me/attendance").authenticated()
 
                                 // 아이템 제출
                                 .requestMatchers(HttpMethod.POST, "/api/items/submissions").authenticated()

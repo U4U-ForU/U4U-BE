@@ -13,12 +13,15 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "user_tbl")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
+    public static final int CYCLE_DAYS = 7;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id", nullable = false)
@@ -43,6 +46,12 @@ public class User extends BaseEntity {
     @Column(name = "currency", nullable = false)
     private int currency;
 
+    @Column(name = "last_attended_date")
+    private LocalDate lastAttendedDate;
+
+    @Column(name = "attendance_day", nullable = false)
+    private int attendanceDay;
+
     @Builder
     private User(String loginId, String password, String email, String nickname, Role role) {
         this.loginId = loginId;
@@ -51,6 +60,7 @@ public class User extends BaseEntity {
         this.nickname = nickname;
         this.role = role;
         this.currency = 20;
+        this.attendanceDay = 0;
     }
 
     public boolean hasEnoughCurrency(int amount) {
@@ -63,5 +73,29 @@ public class User extends BaseEntity {
 
     public void increaseCurrency(int amount) {
         this.currency += amount;
+    }
+
+    public boolean hasAttendedOn(LocalDate date) {
+        return date.equals(lastAttendedDate);
+    }
+
+    public void attend(LocalDate today) {
+        this.attendanceDay = attendanceDay % CYCLE_DAYS + 1;
+        this.lastAttendedDate = today;
+    }
+
+    public int currentAttendanceReward() {
+        return rewardOf(attendanceDay);
+    }
+
+    // 1~3일 4, 4~6일 6, 7일 20
+    private static int rewardOf(int day) {
+        if (day == CYCLE_DAYS) {
+            return 20;
+        }
+        if (day <= 3) {
+            return 4;
+        }
+        return 6;
     }
 }
