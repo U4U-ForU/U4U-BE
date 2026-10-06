@@ -96,6 +96,7 @@ public class TradePostSupport {
                 tradePost.getTradeId(),
                 tradePost.getTitle(),
                 tradePost.getAuthor().getLoginId(),
+                tradePost.getAuthor().getNickname(),
                 getPostItemResponses(tradePost),
                 tradeCommentSupport.getPendingComments(tradePost.getId()),
                 tradePost.getCreatedAt()

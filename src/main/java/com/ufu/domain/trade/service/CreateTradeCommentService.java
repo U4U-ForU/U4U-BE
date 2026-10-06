@@ -62,6 +62,7 @@ public class CreateTradeCommentService {
         return new TradeCommentResponse(
                 tradeComment.getCommentId(),
                 author.getLoginId(),
+                author.getNickname(),
                 items,
                 tradeComment.getCreatedAt()
         );

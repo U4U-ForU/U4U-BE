@@ -9,14 +9,16 @@ public class TradePostDetailResponse {
     private final String tradeId;
     private final String title;
     private final String authorLoginId;
+    private final String authorNickname;
     private final List<TradeItemResponse> items;
     private final List<TradeCommentResponse> comments;
     private final LocalDateTime createdAt;
 
-    public TradePostDetailResponse(String tradeId, String title, String authorLoginId, List<TradeItemResponse> items, List<TradeCommentResponse> comments, LocalDateTime createdAt) {
+    public TradePostDetailResponse(String tradeId, String title, String authorLoginId, String authorNickname, List<TradeItemResponse> items, List<TradeCommentResponse> comments, LocalDateTime createdAt) {
         this.tradeId = tradeId;
         this.title = title;
         this.authorLoginId = authorLoginId;
+        this.authorNickname = authorNickname;
         this.items = items;
         this.comments = comments;
         this.createdAt = createdAt;
