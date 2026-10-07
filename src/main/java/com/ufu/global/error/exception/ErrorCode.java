@@ -11,6 +11,7 @@ public enum ErrorCode {
     PASSWORD_MIS_MATCH(400, "비밀번호가 일치하지 않습니다"),
     LOGIN_ID_ALREADY_EXIST(409, "이미 존재하는 아이디입니다"),
     EMAIL_ALREADY_EXIST(409, "이미 존재하는 이메일입니다"),
+    ATTENDANCE_ALREADY_CHECKED(409, "이미 오늘의 출석을 완료하였습니다"),
     // JWT
     REFRESH_TOKEN_NOT_FOUND(401, "refreshToken을 찾을 수 없습니다"),
     REFRESH_TOKEN_MIS_MATCH(401, "refreshToken 값이 저장된 값과 일치하지 않습니다"),
