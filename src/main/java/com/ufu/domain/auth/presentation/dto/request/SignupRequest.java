@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 public class SignupRequest {
     @NotBlank(message = "로그인 아이디는 비어있을 수 없습니다.")
     @Size(min = 4, max = 20, message = "로그인 아이디는 영문, 숫자 조합 4~20자로 입력해 주세요.")
+    @Pattern(regexp = "^[A-Za-z0-9]+$", message = "로그인 아이디는 영문, 숫자 조합 4~20자로 입력해 주세요.")
     private String loginId;
 
     @NotBlank(message = "비밀번호는 비어있을 수 없습니다.")
