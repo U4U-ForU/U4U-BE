@@ -75,6 +75,10 @@ public class User extends BaseEntity {
         this.currency += amount;
     }
 
+    public void changeNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
     public boolean hasAttendedOn(LocalDate date) {
         return date.equals(lastAttendedDate);
     }
