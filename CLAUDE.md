@@ -30,7 +30,6 @@ DDD-lite 구조이며, 기존 패키지 구조를 유지합니다.
   진입점 public 메서드는 1개, 이름은 `execute`로 통일한다.
   목록은 `GetXxxListService`, 상세는 `GetXxxDetailService`로 구분한다.
 - 유스케이스 내부 전용 헬퍼는 private 메서드, 공유 헬퍼는 `XxxSupport`로 분리한다.
-  (`cauldron` 도메인 적용 완료, 나머지는 순차 적용)
 - 서비스 빈은 `@Service`, `global` 하위 인프라 클래스만 `@Component`를 쓴다.
 - 파일 저장 등 외부 의존 로직은 도메인 Service에 직접 넣지 않고 분리한다.
 
@@ -40,6 +39,8 @@ DDD-lite 구조이며, 기존 패키지 구조를 유지합니다.
   Controller에 직접 주입하지 않으며, 이유를 클래스 Javadoc에 남긴다.
   - `TradeTransactionService`
   - `CauldronRecipeSupport`, `CauldronUserItemSupport`
+  - `ItemSubmissionSupport`
+  - `TradePostSupport`, `TradeCommentSupport`
 - 여러 유저의 자산을 다루는 로직은 `TradeTransactionService.lockUsers()`를 거친다.
   (ID 오름차순 일괄 잠금으로 데드락 방지)
 
@@ -68,7 +69,8 @@ DDD-lite 구조이며, 기존 패키지 구조를 유지합니다.
 
 ## Git
 - default 브랜치는 `develop`. 기능 작업은 최신 `develop`에서 분기한다.
-- 브랜치: `type/kebab-case-요약` (예: `feature/item-submission-api`)
+- 브랜치: `type/이슈번호-종류-kebab-case-요약` (예: `fix/8-bug-nickname-column-use`, `feature/11-feat-take-attendance-api`)
+  - 이슈를 먼저 만들고 그 번호를 붙인다. 브랜치 이름에 한글을 쓰지 않는다.
 - 커밋: `type :: 한글 요약` (예: `feat :: 아이템 제출 API 추가`)
   - 제목 끝에 마침표를 붙이지 않는다. 기술명/클래스명만 영어로 쓴다.
 - type: `feat` `fix` `refactor` `chore` `docs` `style` `rename` `remove`
