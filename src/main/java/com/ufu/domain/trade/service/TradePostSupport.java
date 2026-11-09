@@ -9,6 +9,7 @@ import com.ufu.domain.trade.exception.TradePostInvalidStateException;
 import com.ufu.domain.trade.exception.TradePostNotFoundException;
 import com.ufu.domain.trade.presentation.dto.response.TradeItemResponse;
 import com.ufu.domain.trade.presentation.dto.response.TradePostDetailResponse;
+import com.ufu.domain.trade.presentation.dto.response.TradePostSummaryResponse;
 import com.ufu.domain.trade.repository.TradePostItemRepository;
 import com.ufu.domain.trade.repository.TradePostRepository;
 import lombok.RequiredArgsConstructor;
@@ -91,6 +92,18 @@ public class TradePostSupport {
                 .toList();
     }
 
+    public Map<Long, List<TradeItemResponse>> getItemResponsesByPostId(List<Long> tradePostIds) {
+        return tradePostItemRepository.findAllWithItemByTradePostIdIn(tradePostIds)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        tradePostItem -> tradePostItem.getTradePost().getId(),
+                        Collectors.mapping(
+                                item -> new TradeItemResponse(item.getItem(), item.getQuantity()),
+                                Collectors.toList()
+                        )
+                ));
+    }
+
     public TradePostDetailResponse toDetailResponse(TradePost tradePost) {
         return new TradePostDetailResponse(
                 tradePost.getTradeId(),
@@ -101,5 +114,29 @@ public class TradePostSupport {
                 tradeCommentSupport.getPendingComments(tradePost.getId()),
                 tradePost.getCreatedAt()
         );
+    }
+
+    public List<TradePostSummaryResponse> toSummaryResponses(List<TradePost> tradePosts) {
+        if (tradePosts.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> tradePostIds = tradePosts.stream()
+                .map(TradePost::getId)
+                .toList();
+        Map<Long, List<TradeItemResponse>> itemsByPostId = getItemResponsesByPostId(tradePostIds);
+        Map<Long, Long> commentCountsByPostId = tradeCommentSupport.getPendingCommentCountsByPostId(tradePostIds);
+
+        return tradePosts.stream()
+                .map(tradePost -> new TradePostSummaryResponse(
+                        tradePost.getTradeId(),
+                        tradePost.getTitle(),
+                        tradePost.getAuthor().getLoginId(),
+                        tradePost.getAuthor().getNickname(),
+                        itemsByPostId.getOrDefault(tradePost.getId(), List.of()),
+                        commentCountsByPostId.getOrDefault(tradePost.getId(), 0L).intValue(),
+                        tradePost.getCreatedAt()
+                ))
+                .toList();
     }
 }
