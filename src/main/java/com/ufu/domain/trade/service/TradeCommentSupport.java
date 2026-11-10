@@ -7,6 +7,7 @@ import com.ufu.domain.trade.domain.TradeCommentStatus;
 import com.ufu.domain.trade.domain.TradePost;
 import com.ufu.domain.trade.presentation.dto.response.TradeCommentResponse;
 import com.ufu.domain.trade.presentation.dto.response.TradeItemResponse;
+import com.ufu.domain.trade.repository.TradeCommentCountProjection;
 import com.ufu.domain.trade.repository.TradeCommentItemRepository;
 import com.ufu.domain.trade.repository.TradeCommentRepository;
 import lombok.RequiredArgsConstructor;
@@ -73,6 +74,16 @@ public class TradeCommentSupport {
                                 item -> new TradeItemResponse(item.getItem(), item.getQuantity()),
                                 Collectors.toList()
                         )
+                ));
+    }
+
+    public Map<Long, Long> getPendingCommentCountsByPostId(List<Long> tradePostIds) {
+        return tradeCommentRepository
+                .countByTradePostIdInAndStatus(tradePostIds, TradeCommentStatus.PENDING)
+                .stream()
+                .collect(Collectors.toMap(
+                        TradeCommentCountProjection::getTradePostId,
+                        TradeCommentCountProjection::getCommentCount
                 ));
     }
 
