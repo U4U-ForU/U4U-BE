@@ -130,6 +130,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/trades").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/trades").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/trades/me").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/trades/me/comments").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/trades/{tradeId}").authenticated()
                                 .requestMatchers(HttpMethod.PATCH, "/api/trades/{tradeId}/title").authenticated()
                                 .requestMatchers(HttpMethod.DELETE, "/api/trades/{tradeId}").authenticated()

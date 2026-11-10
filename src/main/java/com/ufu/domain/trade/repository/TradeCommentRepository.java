@@ -50,5 +50,19 @@ public interface TradeCommentRepository extends JpaRepository<TradeComment, Long
             @Param("status") TradeCommentStatus status
     );
 
+    @Query("""
+            select tradeComment
+            from TradeComment tradeComment
+            join fetch tradeComment.tradePost tradePost
+            join fetch tradePost.author
+            where tradeComment.author.id = :authorId
+              and tradeComment.status = :status
+            order by tradeComment.createdAt desc
+            """)
+    List<TradeComment> findAllWithTradePostAndAuthorByAuthorIdAndStatusOrderByCreatedAtDesc(
+            @Param("authorId") Long authorId,
+            @Param("status") TradeCommentStatus status
+    );
+
     Optional<TradeComment> findByCommentId(String commentId);
 }
