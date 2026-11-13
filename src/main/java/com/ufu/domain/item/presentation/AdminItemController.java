@@ -1,7 +1,8 @@
 package com.ufu.domain.item.presentation;
 
 import com.ufu.domain.item.domain.ItemStatus;
-import com.ufu.domain.item.presentation.dto.response.AdminItemSummaryResponse;
+import com.ufu.domain.item.presentation.dto.request.AdminItemSortType;
+import com.ufu.domain.item.presentation.dto.response.AdminItemListResponse;
 import com.ufu.domain.item.service.GetAdminItemListService;
 import com.ufu.domain.itemsubmission.exception.AdminAccessDeniedException;
 import com.ufu.domain.user.domain.Role;
@@ -22,12 +23,14 @@ public class AdminItemController {
     private final GetAdminItemListService getAdminItemListService;
 
     @GetMapping
-    public List<AdminItemSummaryResponse> getItems(
+    public List<AdminItemListResponse> getItems(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @RequestParam(required = false) ItemStatus status
+            @RequestParam(required = false) ItemStatus status,
+            @RequestParam(defaultValue = "APPROVED_AT_DESC") AdminItemSortType sort,
+            @RequestParam(required = false) String keyword
     ) {
         validateAdmin(customUserDetails);
-        return getAdminItemListService.execute(status);
+        return getAdminItemListService.execute(status, sort, keyword);
     }
 
     private void validateAdmin(CustomUserDetails customUserDetails) {
