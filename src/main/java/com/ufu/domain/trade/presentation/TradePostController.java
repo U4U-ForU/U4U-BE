@@ -7,6 +7,7 @@ import com.ufu.domain.trade.presentation.dto.response.TradePostDetailResponse;
 import com.ufu.domain.trade.presentation.dto.response.TradePostSummaryResponse;
 import com.ufu.domain.trade.service.CreateTradePostService;
 import com.ufu.domain.trade.service.DeleteTradePostService;
+import com.ufu.domain.trade.service.GetMyCommentedTradePostListService;
 import com.ufu.domain.trade.service.GetMyTradePostListService;
 import com.ufu.domain.trade.service.GetTradePostDetailService;
 import com.ufu.domain.trade.service.GetTradePostListService;
@@ -35,6 +36,7 @@ public class TradePostController {
     private final CreateTradePostService createTradePostService;
     private final GetTradePostListService getTradePostListService;
     private final GetMyTradePostListService getMyTradePostListService;
+    private final GetMyCommentedTradePostListService getMyCommentedTradePostListService;
     private final GetTradePostDetailService getTradePostDetailService;
     private final UpdateTradePostTitleService updateTradePostTitleService;
     private final DeleteTradePostService deleteTradePostService;
@@ -56,6 +58,11 @@ public class TradePostController {
     @GetMapping("/me")
     public List<TradePostSummaryResponse> getMyPosts(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
         return getMyTradePostListService.execute(getUserId(customUserDetails));
+    }
+
+    @GetMapping("/me/comments")
+    public List<TradePostSummaryResponse> getMyCommentedPosts(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        return getMyCommentedTradePostListService.execute(getUserId(customUserDetails));
     }
 
     @GetMapping("/{tradeId}")
