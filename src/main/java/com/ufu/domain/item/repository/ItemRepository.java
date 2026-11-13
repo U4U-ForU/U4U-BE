@@ -30,5 +30,17 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     List<Item> findAllByStatusAndItemIdNotIn(ItemStatus status, List<String> itemIds);
 
-    List<Item> findAllByOrderByApprovedAtDesc();
+    @Query("""
+            select item
+            from Item item
+            join fetch item.creator creator
+            where (:status is null or item.status = :status)
+              and (:keyword is null
+                   or lower(item.name) like lower(concat('%', :keyword, '%'))
+                   or lower(creator.loginId) like lower(concat('%', :keyword, '%')))
+            """) // 검색 조건이 null -> 통과 아닐 경우 -> 뒤에 조건.
+    List<Item> findAllWithCreatorByStatusAndKeyword(
+            @Param("status") ItemStatus status,
+            @Param("keyword") String keyword
+    );
 }
