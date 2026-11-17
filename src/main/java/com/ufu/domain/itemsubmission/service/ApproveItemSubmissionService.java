@@ -26,7 +26,7 @@ public class ApproveItemSubmissionService {
 
     @Transactional
     public ItemSubmissionApprovalResponse execute(String submissionId) {
-        ItemSubmission itemSubmission = itemSubmissionSupport.findSubmission(submissionId);
+        ItemSubmission itemSubmission = itemSubmissionSupport.findSubmissionForUpdate(submissionId);
 
         if (!itemSubmission.isPending()) {
             throw ItemSubmissionNotApprovableException.EXCEPTION;

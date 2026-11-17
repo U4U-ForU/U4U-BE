@@ -14,7 +14,7 @@ public class CancelItemSubmissionService {
 
     @Transactional
     public ItemSubmissionResponse execute(Long submitterId, String submissionId) {
-        ItemSubmission itemSubmission = itemSubmissionSupport.findSubmission(submissionId);
+        ItemSubmission itemSubmission = itemSubmissionSupport.findSubmissionForUpdate(submissionId);
 
         itemSubmissionSupport.validateOwner(itemSubmission, submitterId);
 
