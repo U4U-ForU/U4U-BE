@@ -26,7 +26,7 @@ public class CombineItemSubmissionService {
 
     @Transactional
     public ItemSubmissionCombinationResponse execute(String submissionId) {
-        ItemSubmission itemSubmission = itemSubmissionSupport.findSubmission(submissionId);
+        ItemSubmission itemSubmission = itemSubmissionSupport.findSubmissionForUpdate(submissionId);
 
         if (!itemSubmission.isPending()) {
             throw ItemSubmissionNotCombinableException.EXCEPTION;

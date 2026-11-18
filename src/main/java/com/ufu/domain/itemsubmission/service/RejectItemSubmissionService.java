@@ -14,7 +14,7 @@ public class RejectItemSubmissionService {
 
     @Transactional
     public ItemSubmissionRejectionResponse execute(String submissionId) {
-        ItemSubmission itemSubmission = itemSubmissionSupport.findSubmission(submissionId);
+        ItemSubmission itemSubmission = itemSubmissionSupport.findSubmissionForUpdate(submissionId);
 
         if (!itemSubmission.isPending()) {
             throw ItemSubmissionNotRejectableException.EXCEPTION;
