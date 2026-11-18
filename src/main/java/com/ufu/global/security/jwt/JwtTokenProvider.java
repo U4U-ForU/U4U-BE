@@ -12,7 +12,10 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.io.DecodingException;
 import io.jsonwebtoken.security.SignatureException;
+import io.jsonwebtoken.security.WeakKeyException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -94,11 +97,13 @@ public class JwtTokenProvider {
             }
 
             return true;
-        } catch (SignatureException e) {
+        // 서명이 없거나(alg none), 우리 키로 검증할 수 없는 알고리즘으로 바꾼 토큰도 서명 검증 실패로 본다.
+        } catch (SignatureException | UnsupportedJwtException | WeakKeyException e) {
             throw new CustomJwtException.SignatureException();
         } catch (ExpiredJwtException e) {
             throw new CustomJwtException.ExpiredException();
-        } catch (MalformedJwtException e) {
+        // base64로 읽을 수 없는 문자가 섞인 토큰도 구조가 깨진 토큰으로 본다.
+        } catch (MalformedJwtException | DecodingException e) {
             throw new CustomJwtException.MalformedJwtException();
         } catch (IllegalArgumentException e) {
             throw new CustomJwtException.IllegalArgumentException();
