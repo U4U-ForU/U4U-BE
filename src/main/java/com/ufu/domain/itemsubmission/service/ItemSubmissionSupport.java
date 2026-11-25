@@ -1,7 +1,6 @@
 package com.ufu.domain.itemsubmission.service;
 
 import com.ufu.domain.itemsubmission.domain.ItemSubmission;
-import com.ufu.domain.itemsubmission.exception.ItemSubmissionForbiddenException;
 import com.ufu.domain.itemsubmission.exception.ItemSubmissionNotFoundException;
 import com.ufu.domain.itemsubmission.repository.ItemSubmissionRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,11 +31,5 @@ public class ItemSubmissionSupport {
     public ItemSubmission findSubmissionForUpdate(String submissionId) {
         return itemSubmissionRepository.findBySubmissionIdForUpdate(submissionId)
                 .orElseThrow(() -> ItemSubmissionNotFoundException.EXCEPTION);
-    }
-
-    public void validateOwner(ItemSubmission itemSubmission, Long submitterId) {
-        if (!itemSubmission.isSubmittedBy(submitterId)) {
-            throw ItemSubmissionForbiddenException.EXCEPTION;
-        }
     }
 }

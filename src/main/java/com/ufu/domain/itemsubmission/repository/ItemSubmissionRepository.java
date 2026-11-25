@@ -11,9 +11,28 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ItemSubmissionRepository extends JpaRepository<ItemSubmission, Long> {
-    List<ItemSubmission> findAllBySubmitterIdOrderByCreatedAtDesc(Long submitterId);
+    @Query("""
+            select itemSubmission
+            from ItemSubmission itemSubmission
+            where itemSubmission.submitter.id = :submitterId
+              and (:status is null or itemSubmission.status = :status)
+            order by itemSubmission.createdAt desc
+            """)
+    List<ItemSubmission> findAllBySubmitterIdAndStatusOrderByCreatedAtDesc(
+            @Param("submitterId") Long submitterId,
+            @Param("status") ItemSubmissionStatus status
+    );
 
-    List<ItemSubmission> findAllByOrderByCreatedAtDesc();
+    @Query("""
+            select itemSubmission
+            from ItemSubmission itemSubmission
+            join fetch itemSubmission.submitter
+            where (:status is null or itemSubmission.status = :status)
+            order by itemSubmission.createdAt desc
+            """)
+    List<ItemSubmission> findAllWithSubmitterByStatusOrderByCreatedAtDesc(
+            @Param("status") ItemSubmissionStatus status
+    );
 
     Optional<ItemSubmission> findBySubmissionId(String submissionId);
 

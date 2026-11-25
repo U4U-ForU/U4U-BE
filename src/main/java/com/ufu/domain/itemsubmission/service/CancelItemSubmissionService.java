@@ -1,6 +1,7 @@
 package com.ufu.domain.itemsubmission.service;
 
 import com.ufu.domain.itemsubmission.domain.ItemSubmission;
+import com.ufu.domain.itemsubmission.exception.ItemSubmissionForbiddenException;
 import com.ufu.domain.itemsubmission.exception.ItemSubmissionNotPendingException;
 import com.ufu.domain.itemsubmission.presentation.dto.response.ItemSubmissionResponse;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,9 @@ public class CancelItemSubmissionService {
     public ItemSubmissionResponse execute(Long submitterId, String submissionId) {
         ItemSubmission itemSubmission = itemSubmissionSupport.findSubmissionForUpdate(submissionId);
 
-        itemSubmissionSupport.validateOwner(itemSubmission, submitterId);
+        if (!itemSubmission.isSubmittedBy(submitterId)) {
+            throw ItemSubmissionForbiddenException.EXCEPTION;
+        }
 
         if (!itemSubmission.isPending()) {
             throw ItemSubmissionNotPendingException.EXCEPTION;

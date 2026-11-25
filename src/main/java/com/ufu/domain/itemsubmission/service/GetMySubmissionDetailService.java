@@ -1,6 +1,7 @@
 package com.ufu.domain.itemsubmission.service;
 
 import com.ufu.domain.itemsubmission.domain.ItemSubmission;
+import com.ufu.domain.itemsubmission.exception.ItemSubmissionReadForbiddenException;
 import com.ufu.domain.itemsubmission.presentation.dto.response.ItemSubmissionResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,9 @@ public class GetMySubmissionDetailService {
     public ItemSubmissionResponse execute(Long submitterId, String submissionId) {
         ItemSubmission itemSubmission = itemSubmissionSupport.findSubmission(submissionId);
 
-        itemSubmissionSupport.validateOwner(itemSubmission, submitterId);
+        if (!itemSubmission.isSubmittedBy(submitterId)) {
+            throw ItemSubmissionReadForbiddenException.EXCEPTION;
+        }
 
         return new ItemSubmissionResponse(itemSubmission);
     }
