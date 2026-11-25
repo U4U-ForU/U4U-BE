@@ -11,15 +11,22 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+    // 4xx는 요청 쪽 문제라 warn, 5xx(예: FILE_UPLOAD_FAILED)는 서버 장애라 error로 남긴다.
+    // 싱글턴 예외의 스택은 실제 발생 위치를 가리키지 않으므로 남기지 않는다.
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException exception) {
-        log.error("handleBusinessException: {}", exception.getMessage(), exception);
         ErrorCode errorCode = exception.getErrorCode();
+        if (errorCode.getStatus() >= HttpStatus.INTERNAL_SERVER_ERROR.value()) {
+            log.error("handleBusinessException: {}", exception.getMessage());
+        } else {
+            log.warn("handleBusinessException: {}", exception.getMessage());
+        }
 
         return ResponseEntity
                 .status(errorCode.getStatus())
@@ -39,7 +46,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
             MethodArgumentNotValidException exception) {
-        log.error("handleMethodArgumentNotValidException: {}", exception.getMessage(), exception);
+        log.warn("handleMethodArgumentNotValidException: {}", exception.getMessage());
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
@@ -48,7 +55,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BindException.class)
     public ResponseEntity<ErrorResponse> handleBindException(BindException exception) {
-        log.error("handleBindException: {}", exception.getMessage(), exception);
+        log.warn("handleBindException: {}", exception.getMessage());
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
@@ -64,6 +71,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(errorCode.getStatus())
                 .body(ErrorResponse.of(errorCode));
+    }
+
+    // sort, status 같은 enum 쿼리 파라미터에 정의되지 않은 값이 들어오면 발생한다.
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(
+            MethodArgumentTypeMismatchException exception) {
+        log.warn("handleMethodArgumentTypeMismatchException: {}", exception.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.of(
+                        HttpStatus.BAD_REQUEST.value(),
+                        exception.getName() + " 값이 올바르지 않습니다"
+                ));
     }
 
     private String getErrorMessage(BindException exception) {
