@@ -1,5 +1,6 @@
 package com.ufu.domain.itemsubmission.presentation;
 
+import com.ufu.domain.itemsubmission.domain.ItemSubmissionStatus;
 import com.ufu.domain.itemsubmission.exception.AdminAccessDeniedException;
 import com.ufu.domain.itemsubmission.presentation.dto.response.AdminItemSubmissionDetailResponse;
 import com.ufu.domain.itemsubmission.presentation.dto.response.AdminItemSubmissionSummaryResponse;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
@@ -35,10 +37,11 @@ public class AdminItemSubmissionController {
 
     @GetMapping
     public List<AdminItemSubmissionSummaryResponse> getSubmissions(
-            @AuthenticationPrincipal CustomUserDetails customUserDetails
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @RequestParam(required = false) ItemSubmissionStatus status
     ) {
         validateAdmin(customUserDetails);
-        return getAdminSubmissionListService.execute();
+        return getAdminSubmissionListService.execute(status);
     }
 
     @GetMapping("/{submissionId}")
